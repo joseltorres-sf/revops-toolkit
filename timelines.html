@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Timeline Visualizer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        .fade-in {
+            animation: fadeIn 0.2s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 relative pb-32">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-slate-200 relative z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-slate-900 text-white p-2 rounded-lg">
+                    <i data-lucide="layout" width="24" height="24"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900">Contract Timeline Visualizer</h1>
+                    <p class="text-sm text-slate-500">Deal Management & Agreement Mapping</p>
+                </div>
+            </div>
+            <div class="text-sm text-slate-400">
+                <span id="active-maps-count">0</span> Active Maps
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6 py-8 space-y-8">
+        
+        <!-- Input Sections Container -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Section 1: Underlying Agreements -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-slate-700"></div>
+                <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-700">
+                    <i data-lucide="layers" class="text-slate-400" width="20" height="20"></i>
+                    1. Underlying Agreements
+                </h2>
+                <form id="underlying-form" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Customer Name</label>
+                            <input type="text" name="customerName" placeholder="e.g. Acme Corp" required
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Agreement Name</label>
+                            <input type="text" name="name" placeholder="e.g. MSA 2023" required
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 outline-none text-sm">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Start Date</label>
+                            <input type="date" name="startDate" required
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 outline-none text-sm text-slate-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">End Date</label>
+                            <input type="date" name="endDate" required
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 outline-none text-sm text-slate-600">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 items-end">
+                        <div class="flex-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Agreement Type</label>
+                            <select name="type" id="underlying-type-select"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none text-sm cursor-pointer">
+                                <!-- Options populated by JS -->
+                            </select>
+                        </div>
+                        <button type="submit" class="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                            <i data-lucide="plus" width="16" height="16"></i> Add
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Section 2: Map New Agreement -->
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1 h-full bg-violet-500"></div>
+                <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-violet-700">
+                    <i data-lucide="trending-up" class="text-violet-500" width="20" height="20"></i>
+                    2. Map New Agreement
+                </h2>
+                <form id="mapped-form" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Customer Name</label>
+                            <input type="text" name="customerName" placeholder="e.g. Acme Global" required
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Agreement Name</label>
+                            <input type="text" name="name" placeholder="e.g. Consolidation Deal" required
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none text-sm">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Start Date</label>
+                            <input type="date" name="startDate" required
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none text-sm text-slate-600">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">End Date</label>
+                            <input type="date" name="endDate" required
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500 outline-none text-sm text-slate-600">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4 items-end">
+                        <div class="flex-1">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Transaction Type</label>
+                            <select name="type" id="mapped-type-select"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none text-sm cursor-pointer">
+                                <!-- Options populated by JS -->
+                            </select>
+                        </div>
+                        <button type="submit" class="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                            <i data-lucide="plus" width="16" height="16"></i> Map
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </div>
+
+        <!-- Legend -->
+        <div class="bg-white p-4 rounded-lg border border-slate-200">
+           <div class="text-xs font-semibold text-slate-500 uppercase mb-3">Legend</div>
+           <div id="legend-container" class="flex flex-wrap gap-x-6 gap-y-3">
+               <!-- Legend items populated by JS -->
+           </div>
+        </div>
+
+        <!-- Timeline Visualizer Section -->
+        <section id="visualizer-section" class="bg-white border border-slate-200 rounded-xl shadow-lg relative transition-all duration-300">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white flex-shrink-0">
+                <h2 class="text-lg font-semibold flex items-center gap-2">
+                    <i data-lucide="calendar" class="text-slate-400" width="20" height="20"></i>
+                    Timeline Visualizer
+                </h2>
+                
+                <div class="flex items-center gap-2">
+                    <!-- Clear All Button -->
+                    <button id="clear-all-btn" class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 text-sm" title="Clear all timelines">
+                        <i data-lucide="eraser" width="18" height="18"></i>
+                        <span id="clear-all-text" class="font-medium hidden">Clear All</span>
+                    </button>
+
+                    <div class="h-4 w-px bg-slate-200 mx-2"></div>
+
+                    <!-- Full Screen Toggle -->
+                    <button id="fullscreen-btn" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Full Screen">
+                        <i data-lucide="maximize-2" width="20" height="20"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="timeline-scroll-container" class="relative w-full overflow-x-auto rounded-b-xl">
+                <div id="timeline-content-wrapper" class="min-w-[800px] p-6 pb-12">
+                    <div id="timeline-container" class="relative h-full min-h-[300px]">
+                        <!-- Grid Lines Layer -->
+                        <div id="grid-layer" class="absolute inset-0 w-full h-full pointer-events-none"></div>
+                        <!-- Bars Layer -->
+                        <div id="bars-layer" class="relative pt-14 space-y-4 z-10"></div>
+                    </div>
+                </div>
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden py-20 flex flex-col items-center justify-center text-slate-400 h-full">
+                    <i data-lucide="layers" width="48" height="48" class="mb-4 text-slate-200"></i>
+                    <p>No agreements mapped yet.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Global Tooltip -->
+    <div id="tooltip" class="fixed z-[220] pointer-events-none hidden" style="transform: translate(-50%, -100%);">
+        <div class="bg-slate-800 text-white text-xs rounded-lg p-3 shadow-2xl border border-slate-700 w-64 fade-in">
+            <div class="absolute bottom-[-5px] left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-800 border-r border-b border-slate-700 rotate-45"></div>
+            <div class="relative z-10">
+                <div id="tooltip-name" class="font-bold text-sm mb-1 text-white"></div>
+                <div id="tooltip-customer" class="text-slate-400 mb-2 font-medium"></div>
+                <div class="grid grid-cols-2 gap-x-3 gap-y-1 mb-2 text-slate-300">
+                    <span>Start:</span> <span id="tooltip-start" class="text-white text-right font-mono"></span>
+                    <span>End:</span> <span id="tooltip-end" class="text-white text-right font-mono"></span>
+                    <span>Type:</span> <span id="tooltip-type" class="text-white text-right capitalize"></span>
+                </div>
+                <div id="tooltip-notes" class="text-slate-300 italic border-t border-slate-700 pt-2 mt-2 leading-relaxed hidden"></div>
+                <div id="tooltip-desc" class="text-[10px] text-slate-500 pt-1 mt-1 font-medium uppercase tracking-wide"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="fixed inset-0 z-[210] flex items-center justify-center p-4 hidden">
+        <div id="edit-modal-backdrop" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden fade-in z-[211]">
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 class="font-semibold text-lg">Edit Agreement Details</h3>
+                <button id="close-edit-modal" class="text-slate-400 hover:text-slate-600">
+                    <i data-lucide="x" width="20" height="20"></i>
+                </button>
+            </div>
+            <form id="edit-form" class="p-6 space-y-4">
+                <input type="hidden" id="edit-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Customer Name</label>
+                    <input type="text" id="edit-customerName" name="customerName" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Agreement Name</label>
+                    <input type="text" id="edit-name" name="name" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Start Date</label>
+                        <input type="date" id="edit-startDate" name="startDate" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">End Date</label>
+                        <input type="date" id="edit-endDate" name="endDate" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none text-sm">
+                    </div>
+                </div>
+                <div>
+                   <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Context / Notes</label>
+                   <textarea id="edit-notes" name="notes" rows="3" placeholder="Add additional context regarding this deal..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 outline-none text-sm resize-none"></textarea>
+                </div>
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="flex-1 bg-slate-900 text-white py-2 rounded-lg text-sm font-medium hover:bg-slate-800">Save Changes</button>
+                    <button type="button" id="delete-from-modal" class="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:bg-red-50 flex items-center gap-2">
+                        <i data-lucide="trash-2" width="16" height="16"></i> Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Clear Confirmation Modal -->
+    <div id="clear-modal" class="fixed inset-0 z-[230] flex items-center justify-center p-4 hidden">
+        <div id="clear-modal-backdrop" class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"></div>
+        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden fade-in z-[231]">
+            <div class="p-6 text-center">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
+                    <i data-lucide="alert-triangle" width="24" height="24"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-2">Clear all timelines?</h3>
+                <p class="text-sm text-slate-500 mb-6">
+                    Are you sure you want to delete all contract timelines? This action cannot be undone.
+                </p>
+                <div class="flex gap-3">
+                    <button id="cancel-clear" class="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-slate-700 font-medium hover:bg-slate-50 transition-colors">Cancel</button>
+                    <button id="confirm-clear" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors">Yes, Delete All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Data & Constants ---
+
+        const TYPE_DEFINITIONS = {
+            'consolidation': { label: 'Consolidation', color: 'bg-violet-600', borderColor: 'border-violet-700', iconName: 'merge', description: 'Merging multiple agreements/customers' },
+            'divestiture': { label: 'Divestiture', color: 'bg-slate-500', borderColor: 'border-slate-600', iconName: 'scissors', description: 'Separation of business unit or assets' },
+            'early-renewal': { label: 'Early Renewal', color: 'bg-orange-500', borderColor: 'border-orange-600', iconName: 'refresh-cw', description: 'Renewing before the original end date' },
+            'supersede': { label: 'Supersede & Replace', color: 'bg-blue-600', borderColor: 'border-blue-700', iconName: 'arrow-right-left', description: 'Replacing existing contract completely' },
+            'true-up': { label: 'True-up', color: 'bg-indigo-600', borderColor: 'border-indigo-700', iconName: 'check-circle-2', description: 'Retroactive usage adjustment' },
+            'reduction': { label: 'Reduction', color: 'bg-red-600', borderColor: 'border-red-700', iconName: 'arrow-down-circle', description: 'Downsell or removal of services' },
+            'base': { label: 'Base Agreement', color: 'bg-slate-600', borderColor: 'border-slate-700', iconName: 'file-text', description: 'Standard agreement' },
+        };
+
+        const MAPPED_TYPES = ['consolidation', 'divestiture', 'early-renewal', 'supersede', 'true-up', 'reduction'];
+        const UNDERLYING_TYPES = ['true-up', 'reduction', 'supersede', 'early-renewal'];
+
+        let agreements = [
+            { id: 1, category: 'underlying', customerName: 'Acme Corp', name: 'Original MSA', startDate: '2023-01-01', endDate: '2025-12-31', type: 'supersede', notes: 'Superseded previous 2020 contract' },
+            { id: 2, category: 'underlying', customerName: 'Acme Corp', name: 'Seat Expansion Q3', startDate: '2023-07-01', endDate: '2025-12-31', type: 'true-up', notes: '' },
+            { id: 3, category: 'mapped', customerName: 'Acme Corp', name: 'Global Consolidation', startDate: '2024-06-01', endDate: '2027-05-31', type: 'consolidation', notes: 'Consolidating US and EMEA contracts' },
+        ];
+
+        let isFullScreen = false;
+        let editingId = null;
+
+        // --- Helpers ---
+
+        const formatDate = (dateString) => {
+            if (!dateString) return '';
+            const date = new Date(dateString + 'T00:00:00'); // Ensure local date interpretation
+            return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric', day: 'numeric' });
+        };
+
+        const getTypeStyle = (typeId) => TYPE_DEFINITIONS[typeId] || TYPE_DEFINITIONS['base'];
+
+        const getTimelineStats = () => {
+            if (agreements.length === 0) return null;
+            const dates = agreements.flatMap(a => [new Date(a.startDate + 'T00:00:00'), new Date(a.endDate + 'T00:00:00')]);
+            const minDate = new Date(Math.min(...dates));
+            const maxDate = new Date(Math.max(...dates));
+            
+            // Add padding
+            minDate.setMonth(minDate.getMonth() - 2);
+            maxDate.setMonth(maxDate.getMonth() + 4);
+            
+            return { minDate, maxDate, totalDuration: maxDate - minDate };
+        };
+
+        // --- Rendering ---
+
+        function renderApp() {
+            document.getElementById('active-maps-count').textContent = agreements.length;
+            renderLegend();
+            renderTimeline();
+            updateClearButton();
+            lucide.createIcons();
+        }
+
+        function renderLegend() {
+            const container = document.getElementById('legend-container');
+            container.innerHTML = '';
+            
+            const typesToShow = Object.entries(TYPE_DEFINITIONS).filter(([key]) => key !== 'base');
+            
+            typesToShow.forEach(([key, type]) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center gap-2 text-sm';
+                item.innerHTML = `
+                    <span class="w-3 h-3 rounded-full ${type.color}"></span>
+                    <span class="text-slate-600">${type.label}</span>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function renderTimeline() {
+            const wrapper = document.getElementById('timeline-content-wrapper');
+            const emptyState = document.getElementById('empty-state');
+            const gridLayer = document.getElementById('grid-layer');
+            const barsLayer = document.getElementById('bars-layer');
+            const clearAllBtn = document.getElementById('clear-all-btn');
+
+            gridLayer.innerHTML = '';
+            barsLayer.innerHTML = '';
+
+            if (agreements.length === 0) {
+                wrapper.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                clearAllBtn.style.display = 'none';
+                return;
+            }
+
+            wrapper.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            clearAllBtn.style.display = 'flex';
+
+            const stats = getTimelineStats();
+            if (!stats) return;
+
+            // Render Grid
+            const current = new Date(stats.minDate);
+            current.setDate(1);
+            
+            while (current < stats.maxDate) {
+                const isYearStart = current.getMonth() === 0;
+                const isQuarterStart = current.getMonth() % 3 === 0;
+                const left = ((current - stats.minDate) / stats.totalDuration) * 100;
+
+                if (left >= 0 && left <= 100) {
+                    const line = document.createElement('div');
+                    line.className = `absolute top-0 bottom-0 border-l ${isYearStart ? 'border-slate-300' : 'border-slate-100'} z-0`;
+                    line.style.left = `${left}%`;
+                    
+                    let label = '';
+                    if (isYearStart) {
+                        label = `<span class="absolute top-2 left-1 text-xs font-bold text-slate-500">${current.getFullYear()}</span>`;
+                    } else if (isQuarterStart) {
+                        label = `<span class="absolute top-2 left-1 text-[10px] text-slate-300 font-medium">Q${Math.floor(current.getMonth() / 3) + 1}</span>`;
+                    }
+                    line.innerHTML = label;
+                    gridLayer.appendChild(line);
+                }
+                current.setMonth(current.getMonth() + 1);
+            }
+
+            // Render Bars
+            agreements.forEach(agreement => {
+                const styleInfo = getTypeStyle(agreement.type);
+                const startDate = new Date(agreement.startDate + 'T00:00:00');
+                const endDate = new Date(agreement.endDate + 'T00:00:00');
+                
+                const left = ((startDate - stats.minDate) / stats.totalDuration) * 100;
+                const width = ((endDate - startDate) / stats.totalDuration) * 100;
+
+                const bar = document.createElement('div');
+                bar.className = 'relative h-16 group transition-all duration-300 hover:-translate-y-1 hover:z-30 cursor-pointer';
+                bar.style.left = `${left}%`;
+                bar.style.width = `${width}%`;
+                
+                bar.innerHTML = `
+                    <div class="h-full rounded-md shadow-md border-l-4 ${styleInfo.color} ${styleInfo.borderColor} bg-opacity-95 hover:bg-opacity-100 flex flex-col justify-center px-3 relative overflow-hidden text-white transition-all">
+                        <div class="absolute top-0 left-0 right-0 h-1/2 bg-white opacity-10 pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10 w-full h-full">
+                            <div class="overflow-hidden flex-1 pointer-events-none">
+                                <div class="flex items-center gap-2 mb-0.5">
+                                    <i data-lucide="${styleInfo.iconName}" width="14" height="14" class="opacity-90 flex-shrink-0"></i>
+                                    <span class="font-bold text-xs truncate leading-tight drop-shadow-md">${agreement.name}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-[10px] opacity-90 truncate font-medium drop-shadow-md">
+                                    <i data-lucide="building-2" width="10" height="10"></i>
+                                    <span>${agreement.customerName || 'No Customer Listed'}</span>
+                                </div>
+                                <div class="text-[10px] opacity-80 truncate mt-1">
+                                    ${formatDate(agreement.startDate)} - ${formatDate(agreement.endDate)}
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0 h-full">
+                                <button class="edit-btn bg-black/20 hover:bg-black/40 p-1.5 rounded text-white transition-colors" title="Edit">
+                                    <i data-lucide="pencil" width="14" height="14"></i>
+                                </button>
+                                <button class="delete-btn bg-black/20 hover:bg-red-500/80 p-1.5 rounded text-white transition-colors" title="Delete">
+                                    <i data-lucide="trash-2" width="14" height="14"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Tooltip Events
+                bar.addEventListener('mouseenter', (e) => showTooltip(e, agreement));
+                bar.addEventListener('mouseleave', hideTooltip);
+
+                // Button Events
+                bar.querySelector('.edit-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEditModal(agreement);
+                });
+                bar.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteAgreement(agreement.id);
+                });
+
+                barsLayer.appendChild(bar);
+            });
+        }
+
+        function populateSelects() {
+            const underlyingSelect = document.getElementById('underlying-type-select');
+            UNDERLYING_TYPES.forEach(typeId => {
+                const type = TYPE_DEFINITIONS[typeId];
+                const opt = document.createElement('option');
+                opt.value = typeId;
+                opt.text = type.label;
+                underlyingSelect.appendChild(opt);
+            });
+            // Set default
+            underlyingSelect.value = 'supersede';
+
+            const mappedSelect = document.getElementById('mapped-type-select');
+            MAPPED_TYPES.forEach(typeId => {
+                const type = TYPE_DEFINITIONS[typeId];
+                const opt = document.createElement('option');
+                opt.value = typeId;
+                opt.text = type.label;
+                mappedSelect.appendChild(opt);
+            });
+            // Set default
+            mappedSelect.value = 'consolidation';
+        }
+
+        // --- Interaction Logic ---
+
+        function addAgreement(formId, category) {
+            const form = document.getElementById(formId);
+            const formData = new FormData(form);
+            
+            const startDate = formData.get('startDate');
+            const endDate = formData.get('endDate');
+
+            if (new Date(endDate) < new Date(startDate)) {
+                alert("End date must be after start date");
+                return;
+            }
+
+            const newAgreement = {
+                id: Date.now(),
+                category: category,
+                customerName: formData.get('customerName'),
+                name: formData.get('name'),
+                startDate: startDate,
+                endDate: endDate,
+                type: formData.get('type'),
+                notes: ''
+            };
+
+            agreements.push(newAgreement);
+            
+            // Reset fields but keep customer name for convenience
+            const customerName = formData.get('customerName');
+            form.reset();
+            form.querySelector('[name="customerName"]').value = customerName;
+            // Reset selects to defaults
+            if(category === 'underlying') document.getElementById('underlying-type-select').value = 'supersede';
+            else document.getElementById('mapped-type-select').value = 'consolidation';
+
+            renderApp();
+        }
+
+        function deleteAgreement(id) {
+            agreements = agreements.filter(a => a.id !== id);
+            if(editingId === id) closeEditModal();
+            renderApp();
+        }
+
+        // --- Modal Logic ---
+
+        function openEditModal(agreement) {
+            hideTooltip();
+            editingId = agreement.id;
+            
+            document.getElementById('edit-id').value = agreement.id;
+            document.getElementById('edit-customerName').value = agreement.customerName;
+            document.getElementById('edit-name').value = agreement.name;
+            document.getElementById('edit-startDate').value = agreement.startDate;
+            document.getElementById('edit-endDate').value = agreement.endDate;
+            document.getElementById('edit-notes').value = agreement.notes || '';
+            
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            editingId = null;
+            document.getElementById('edit-modal').classList.add('hidden');
+        }
+
+        function saveEdit(e) {
+            e.preventDefault();
+            if (!editingId) return;
+
+            const updated = {
+                id: parseInt(document.getElementById('edit-id').value),
+                customerName: document.getElementById('edit-customerName').value,
+                name: document.getElementById('edit-name').value,
+                startDate: document.getElementById('edit-startDate').value,
+                endDate: document.getElementById('edit-endDate').value,
+                notes: document.getElementById('edit-notes').value
+            };
+
+            const index = agreements.findIndex(a => a.id === editingId);
+            if (index !== -1) {
+                agreements[index] = { ...agreements[index], ...updated };
+            }
+
+            closeEditModal();
+            renderApp();
+        }
+
+        // --- Tooltip Logic ---
+
+        function showTooltip(e, agreement) {
+            const tooltip = document.getElementById('tooltip');
+            const rect = e.currentTarget.getBoundingClientRect();
+            const typeInfo = getTypeStyle(agreement.type);
+
+            document.getElementById('tooltip-name').textContent = agreement.name;
+            document.getElementById('tooltip-customer').textContent = agreement.customerName || '';
+            document.getElementById('tooltip-start').textContent = formatDate(agreement.startDate);
+            document.getElementById('tooltip-end').textContent = formatDate(agreement.endDate);
+            document.getElementById('tooltip-type').textContent = typeInfo.label;
+            
+            const notesEl = document.getElementById('tooltip-notes');
+            if (agreement.notes) {
+                notesEl.textContent = `"${agreement.notes}"`;
+                notesEl.classList.remove('hidden');
+            } else {
+                notesEl.classList.add('hidden');
+            }
+            
+            document.getElementById('tooltip-desc').textContent = typeInfo.description;
+
+            // Positioning
+            tooltip.style.top = `${rect.top - 8}px`;
+            tooltip.style.left = `${rect.left + (rect.width / 2)}px`;
+            tooltip.classList.remove('hidden');
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').classList.add('hidden');
+        }
+
+        // --- Full Screen & Clear Logic ---
+
+        function toggleFullScreen() {
+            const section = document.getElementById('visualizer-section');
+            const wrapper = document.getElementById('timeline-content-wrapper');
+            const container = document.getElementById('timeline-scroll-container');
+            const clearText = document.getElementById('clear-all-text');
+            const btn = document.getElementById('fullscreen-btn');
+            
+            isFullScreen = !isFullScreen;
+
+            if (isFullScreen) {
+                // Apply Full Screen Styles
+                section.className = 'bg-white border-0 !fixed !top-0 !left-0 !w-screen !h-screen !z-[200] !m-0 rounded-none flex flex-col';
+                container.classList.remove('rounded-b-xl');
+                container.classList.add('flex-grow');
+                wrapper.classList.add('h-full');
+                clearText.classList.remove('hidden');
+                
+                // Update Icon - Re-inject HTML to ensure lucide finds it
+                btn.innerHTML = '<i data-lucide="minimize-2" width="20" height="20"></i>';
+            } else {
+                // Revert Styles
+                section.className = 'bg-white border border-slate-200 rounded-xl shadow-lg relative transition-all duration-300';
+                container.classList.add('rounded-b-xl');
+                container.classList.remove('flex-grow');
+                wrapper.classList.remove('h-full');
+                clearText.classList.add('hidden');
+
+                // Update Icon - Re-inject HTML to ensure lucide finds it
+                btn.innerHTML = '<i data-lucide="maximize-2" width="20" height="20"></i>';
+            }
+            lucide.createIcons();
+        }
+
+        function updateClearButton() {
+            const clearText = document.getElementById('clear-all-text');
+            if (isFullScreen) clearText.classList.remove('hidden');
+            else clearText.classList.add('hidden');
+        }
+
+        // --- Event Listeners ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            populateSelects();
+            renderApp();
+
+            // Forms
+            document.getElementById('underlying-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                addAgreement('underlying-form', 'underlying');
+            });
+            document.getElementById('mapped-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                addAgreement('mapped-form', 'mapped');
+            });
+
+            // Edit Modal
+            document.getElementById('close-edit-modal').addEventListener('click', closeEditModal);
+            document.getElementById('edit-modal-backdrop').addEventListener('click', closeEditModal);
+            document.getElementById('edit-form').addEventListener('submit', saveEdit);
+            document.getElementById('delete-from-modal').addEventListener('click', () => {
+                if(editingId) deleteAgreement(editingId);
+            });
+
+            // Clear All
+            const clearModal = document.getElementById('clear-modal');
+            document.getElementById('clear-all-btn').addEventListener('click', () => {
+                clearModal.classList.remove('hidden');
+            });
+            document.getElementById('cancel-clear').addEventListener('click', () => {
+                clearModal.classList.add('hidden');
+            });
+            document.getElementById('clear-modal-backdrop').addEventListener('click', () => {
+                clearModal.classList.add('hidden');
+            });
+            document.getElementById('confirm-clear').addEventListener('click', () => {
+                agreements = [];
+                clearModal.classList.add('hidden');
+                renderApp();
+            });
+
+            // Full Screen
+            document.getElementById('fullscreen-btn').addEventListener('click', toggleFullScreen);
+        });
+
+    </script>
+</body>
+</html>
