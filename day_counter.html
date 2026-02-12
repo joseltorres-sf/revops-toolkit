@@ -3,165 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Day Counter</title>
+    <title>Day Counter | RevOps Tools</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            base: '#F5F2EB',       /* Main Background */
+                            surface: '#EBE6DD',    /* Secondary/Hover */
+                            line: '#D4CDC1',       /* Borders/Grid Lines */
+                            text: '#3A352F',       /* Primary Text */
+                            muted: '#8C857B',      /* Secondary Text */
+                            accent: '#A4907C',     /* Accents */
+                            forest: '#1F3A2C',     /* Dark Interactive Green */
+                            forestTint: '#E6EAE6', /* Light Green Tint */
+                        },
+                        // Functional Status Colors
+                        rust: { DEFAULT: '#C86A58', tint: '#F7EAE8' },
+                        brass: '#C29A5B',
+                        slate: { DEFAULT: '#5B7B8C', tint: '#EAF0F2' },
+                        forest: { 500: '#4A6B56', 700: '#2C4F3B' } 
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
+        body {
+            background-color: #F5F2EB;
+            color: #3A352F;
+            /* Subtle organic noise texture */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Hard shadow for main container (Industrial Look) */
+        .industrial-shadow {
+            box-shadow: 8px 8px 0px 0px rgba(58,53,47,0.05);
+        }
+
+        /* Premium Reveal Animations */
+        .reveal-up {
+            opacity: 0;
+            animation: revealUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transform: translateY(40px);
+        }
+        
+        @keyframes revealUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .fade-in {
             animation: fadeIn 0.3s ease-out forwards;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
+
+        /* Remove default input styling */
+        input:focus, select:focus, textarea:focus { outline: none; box-shadow: none; }
+        
+        /* Toast Notification Animations */
+        .toast-enter { animation: slideInTop 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .toast-exit { animation: fadeOutTop 0.3s ease-in forwards; }
+        @keyframes slideInTop { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOutTop { to { transform: translateY(-50px); opacity: 0; } }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 pb-20">
+<body class="min-h-screen flex flex-col p-6 md:p-10 lg:p-16 pt-8 md:pt-10 relative selection:bg-brand-forest selection:text-brand-base">
 
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 relative z-40 shadow-sm">
-        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="bg-slate-900 text-white p-2 rounded-lg">
-                    <i data-lucide="calendar-clock" width="24" height="24"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-slate-900">Day Counter</h1>
-                    <p class="text-sm text-slate-500">Duration & Date Calculator</p>
-                </div>
-            </div>
-            <!-- Optional: Link back to visualizer if this were a multi-page app -->
+    <!-- Header Navigation -->
+    <div class="w-full max-w-4xl mx-auto mb-8 md:mb-12 flex justify-between items-end reveal-up delay-100">
+        <div>
+            <a href="index.html" class="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] text-brand-muted hover:text-brand-forest transition-colors uppercase mb-4 group">
+                <i data-lucide="arrow-left" width="12" height="12" class="group-hover:-translate-x-1 transition-transform"></i>
+                Return
+            </a>
+            <h1 class="text-3xl md:text-4xl font-medium tracking-tight text-brand-text">Day Counter</h1>
+            <p class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase mt-2">Duration & Date Calculator</p>
         </div>
-    </header>
-
-    <main class="max-w-5xl mx-auto px-6 py-10 space-y-8">
         
-        <!-- Input Section -->
-        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
-            
-            <div class="flex flex-col md:flex-row items-end gap-6">
-                <!-- Start Date -->
-                <div class="w-full md:w-1/3">
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Start Date</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="calendar" class="text-slate-400 group-focus-within:text-indigo-500 transition-colors" width="18" height="18"></i>
+        <!-- Status Indicator -->
+        <div class="flex items-center gap-3 mb-1">
+            <span id="status-dot" class="w-2 h-2 rounded-full bg-brass animate-pulse"></span>
+            <span id="status-text" class="font-mono text-[10px] tracking-widest text-brand-muted uppercase">Ready</span>
+            <button id="info-btn" class="ml-2 text-brand-muted hover:text-brand-forest transition-colors">
+                <i data-lucide="info" width="18" height="18"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <main class="w-full max-w-4xl mx-auto reveal-up delay-200 flex-grow flex flex-col">
+        
+        <!-- 1px Hairline Grid Wrapper -->
+        <div class="bg-brand-line border border-brand-line industrial-shadow flex flex-col gap-px relative">
+
+            <!-- Input Section -->
+            <section class="bg-brand-base p-8 md:p-10">
+                <div class="flex justify-between items-end mb-8">
+                    <h2 class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase flex items-center gap-2">
+                        <i data-lucide="calendar-clock" width="14" height="14" class="text-brand-text"></i>
+                        01. Timeframe Configuration
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                    <!-- Start Date -->
+                    <div>
+                        <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase mb-2">Start Date</label>
+                        <div class="flex items-center border-b border-brand-line focus-within:border-brand-forest transition-colors py-1 group">
+                            <input type="date" id="start-date" 
+                                class="w-full bg-transparent text-brand-text text-xl md:text-2xl font-medium outline-none font-mono placeholder-brand-muted/50 uppercase">
                         </div>
-                        <input type="date" id="start-date" 
-                            class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 block w-full pl-10 p-3 transition-all outline-none" 
-                            placeholder="Select date">
                     </div>
-                </div>
 
-                <!-- Arrow Icon (Visual) -->
-                <div class="hidden md:flex items-center justify-center pb-3 text-slate-300">
-                    <i data-lucide="arrow-right" width="24" height="24"></i>
-                </div>
-
-                <!-- End Date -->
-                <div class="w-full md:w-1/3">
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">End Date</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i data-lucide="flag" class="text-slate-400 group-focus-within:text-indigo-500 transition-colors" width="18" height="18"></i>
+                    <!-- End Date -->
+                    <div>
+                        <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase mb-2">End Date</label>
+                        <div class="flex items-center border-b border-brand-line focus-within:border-brand-forest transition-colors py-1 group">
+                            <input type="date" id="end-date" 
+                                class="w-full bg-transparent text-brand-text text-xl md:text-2xl font-medium outline-none font-mono placeholder-brand-muted/50 uppercase">
                         </div>
-                        <input type="date" id="end-date" 
-                            class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 block w-full pl-10 p-3 transition-all outline-none" 
-                            placeholder="Select date">
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="w-full md:w-auto flex gap-2">
-                    <button id="calculate-btn" class="flex-1 md:flex-none bg-slate-900 hover:bg-slate-800 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg shadow-slate-900/20">
-                        <i data-lucide="calculator" width="18" height="18"></i>
-                        Calculate
-                    </button>
-                    <button id="reset-btn" class="md:flex-none p-3 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" title="Reset">
-                        <i data-lucide="rotate-ccw" width="20" height="20"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Quick toggles for including end date -->
-            <div class="mt-4 flex items-center gap-2">
-                <input type="checkbox" id="include-end-date" class="w-4 h-4 text-indigo-600 bg-slate-100 border-slate-300 rounded focus:ring-indigo-500">
-                <label for="include-end-date" class="text-sm text-slate-500 font-medium select-none cursor-pointer">Include end date in count (+1 day)</label>
-            </div>
-        </section>
-
-        <!-- Results Section (Initially Hidden) -->
-        <div id="results-container" class="hidden space-y-8 fade-in">
-            
-            <!-- Primary Result -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Total Days (Hero) -->
-                <div class="md:col-span-1 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-xl shadow-lg p-6 text-white flex flex-col justify-between relative overflow-hidden group stat-card transition-all duration-300">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                        <i data-lucide="calendar-days" width="80" height="80"></i>
-                    </div>
-                    <div class="relative z-10">
-                        <div class="text-indigo-100 text-sm font-semibold uppercase tracking-wider mb-1">Total Duration</div>
-                        <div class="text-5xl font-bold tracking-tight mb-1" id="res-total-days">0</div>
-                        <div class="text-indigo-200 font-medium">Days</div>
-                    </div>
-                    <div class="mt-6 relative z-10 pt-4 border-t border-indigo-500/30 flex justify-between items-end">
-                        <div>
-                            <div class="text-xs text-indigo-200 uppercase tracking-wide">Business Days</div>
-                            <div class="text-xl font-bold" id="res-business-days">0</div>
+                <div class="mt-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                    <!-- Inclusion Logic Toggle -->
+                    <div>
+                        <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase mb-3">End Date Logic</label>
+                        <div class="flex font-mono text-[10px] tracking-[0.15em] uppercase border border-brand-line bg-brand-surface inline-flex cursor-pointer">
+                            <button id="logic-exclude" class="px-4 py-2 bg-brand-base text-brand-text transition-colors border-r border-brand-line">
+                                Exclude End
+                            </button>
+                            <button id="logic-include" class="px-4 py-2 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors">
+                                Include End (+1)
+                            </button>
                         </div>
-                         <div class="text-xs text-indigo-300 italic">(Mon-Fri)</div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-4 w-full md:w-auto">
+                        <button id="reset-btn" class="font-mono text-[10px] tracking-[0.2em] text-rust hover:bg-rust-tint transition-colors px-4 py-3 uppercase border border-transparent">
+                            Reset
+                        </button>
+                        <button id="calculate-btn" class="flex-1 md:flex-none font-mono text-[10px] tracking-[0.2em] text-brand-base bg-brand-forest hover:bg-forest-700 transition-colors px-8 py-3 uppercase flex items-center justify-center gap-2">
+                            <i data-lucide="calculator" width="12" height="12"></i> Calculate
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Results Section (Hidden by default) -->
+            <section id="results-container" class="bg-brand-surface p-8 md:p-10 hidden fade-in border-t border-brand-line">
+                <h2 class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase flex items-center gap-2 mb-8">
+                    <i data-lucide="bar-chart-3" width="14" height="14" class="text-brand-text"></i>
+                    02. Calculated Duration
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-brand-line border border-brand-line mb-8">
+                    <!-- Total Days -->
+                    <div class="bg-brand-base p-6 flex flex-col justify-between h-32 md:h-40">
+                        <span class="font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase">Total Calendar Days</span>
+                        <div class="flex items-baseline gap-2">
+                            <span id="res-total-days" class="text-4xl md:text-5xl font-medium text-brand-text tracking-tight">0</span>
+                            <span class="font-mono text-xs text-brand-muted uppercase">Days</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Term in Years -->
+                    <div class="bg-brand-base p-6 flex flex-col justify-between h-32 md:h-40">
+                        <span class="font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase">Term in Years</span>
+                        <div class="flex items-baseline gap-2">
+                            <span id="res-term-years" class="text-4xl md:text-5xl font-medium text-brand-accent tracking-tight">0.0000</span>
+                            <span class="font-mono text-xs text-brand-muted uppercase">Years</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Detailed Breakdown -->
-                <div class="md:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-center stat-card transition-all duration-300">
-                    <div class="flex items-center gap-2 mb-6">
-                        <i data-lucide="align-left" class="text-slate-400" width="20" height="20"></i>
-                        <h3 class="text-lg font-semibold text-slate-800">Complete Breakdown</h3>
+                <div class="border-t border-brand-line pt-6">
+                    <div class="grid grid-cols-3 gap-4 mb-4">
+                        <div class="text-center md:text-left">
+                            <span class="block text-2xl font-medium text-brand-text mb-1" id="res-years">0</span>
+                            <span class="font-mono text-[10px] tracking-widest text-brand-muted uppercase">Years</span>
+                        </div>
+                        <div class="text-center md:text-left border-l border-brand-line pl-4 md:pl-0 md:border-l-0">
+                            <span class="block text-2xl font-medium text-brand-text mb-1" id="res-months">0</span>
+                            <span class="font-mono text-[10px] tracking-widest text-brand-muted uppercase">Months</span>
+                        </div>
+                        <div class="text-center md:text-left border-l border-brand-line pl-4 md:pl-0 md:border-l-0">
+                            <span class="block text-2xl font-medium text-brand-text mb-1" id="res-days">0</span>
+                            <span class="font-mono text-[10px] tracking-widest text-brand-muted uppercase">Days</span>
+                        </div>
                     </div>
                     
-                    <div class="grid grid-cols-3 gap-4 text-center divide-x divide-slate-100">
-                        <div class="px-2">
-                            <div class="text-3xl font-bold text-slate-700 mb-1" id="res-years">0</div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Years</div>
-                        </div>
-                        <div class="px-2">
-                            <div class="text-3xl font-bold text-slate-700 mb-1" id="res-months">0</div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Months</div>
-                        </div>
-                        <div class="px-2">
-                            <div class="text-3xl font-bold text-slate-700 mb-1" id="res-days">0</div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Days</div>
-                        </div>
+                    <div class="bg-brand-base border border-brand-line p-3 text-center md:text-left">
+                        <span class="font-mono text-[10px] tracking-widest text-brand-muted uppercase mr-2">Readable Format:</span>
+                        <span id="res-readable" class="text-sm font-medium text-brand-text">0 days</span>
                     </div>
+                </div>
+            </section>
 
-                    <div class="mt-6 bg-slate-50 rounded-lg p-4 text-center border border-slate-100">
-                        <span class="text-slate-500 text-sm">Or exactly </span>
-                        <span class="text-slate-900 font-bold" id="res-readable">0 years, 0 months, 0 days</span>
+            <!-- Empty State -->
+            <div id="empty-state" class="bg-brand-surface p-12 flex flex-col items-center justify-center text-brand-muted border-t border-brand-line">
+                <i data-lucide="calendar" width="32" height="32" class="mb-4 opacity-50"></i>
+                <p class="font-mono text-[10px] tracking-widest uppercase">Awaiting Dates</p>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-4xl mx-auto px-4 md:px-8 mt-12 text-center reveal-up delay-300">
+        <span class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase">
+            Designed & Developed by <span class="text-brand-text font-medium">Jose Torres</span>
+        </span>
+    </footer>
+
+    <!-- Documentation Info Modal -->
+    <div id="info-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <div id="info-backdrop" class="absolute inset-0 bg-brand-text/10 backdrop-blur-sm transition-opacity"></div>
+        <div class="relative bg-brand-base border border-brand-line w-full max-w-lg fade-in z-50 industrial-shadow">
+            
+            <div class="px-6 py-4 border-b border-brand-line flex justify-between items-center bg-brand-surface">
+                <h3 class="font-mono text-[10px] tracking-[0.2em] text-brand-text uppercase flex items-center gap-2">
+                    <i data-lucide="file-text" width="14" height="14"></i>
+                    Documentation
+                </h3>
+                <button id="close-info-btn" class="text-brand-muted hover:text-brand-text transition-colors">
+                    <i data-lucide="x" width="16" height="16"></i>
+                </button>
+            </div>
+
+            <div class="p-8 space-y-6 text-sm text-brand-text leading-relaxed">
+                <div>
+                    <h4 class="font-medium mb-2">System Objective</h4>
+                    <p class="text-brand-muted">Accurate day counting is essential for SLA tracking, contract term validation, and proration logic. This tool standardizes calculation methods to prevent "off-by-one" errors common in ad-hoc spreadsheet math.</p>
+                </div>
+
+                <div class="border-t border-brand-line pt-6">
+                    <h4 class="font-medium mb-2">Finance Logic</h4>
+                    <p class="text-brand-muted">The calculation uses strict start-of-day timestamps (00:00:00) to ensure whole-day integers, independent of timezones or seconds.</p>
+                    <div class="bg-brand-surface p-4 mt-3 border border-brand-line font-mono text-[10px] tracking-wide text-center text-brand-text uppercase mb-4">
+                        Total Days = (End Date - Start Date)
+                    </div>
+                    
+                    <h4 class="font-medium mb-2">Term in Years</h4>
+                    <p class="text-brand-muted">Calculates the precise decimal year value based on a standard 365-day year basis (Actual/365).</p>
+                    <div class="bg-brand-surface p-4 mt-3 border border-brand-line font-mono text-[10px] tracking-wide text-center text-brand-text uppercase">
+                        Total Days / 365.0000
                     </div>
                 </div>
             </div>
-
         </div>
+    </div>
 
-        <!-- Empty State (Initially Visible) -->
-        <div id="empty-state" class="py-12 flex flex-col items-center justify-center text-center">
-            <div class="bg-slate-100 p-4 rounded-full mb-4">
-                <i data-lucide="calendar-clock" class="text-slate-300" width="40" height="40"></i>
-            </div>
-            <h3 class="text-lg font-medium text-slate-900 mb-1">Ready to Calculate</h3>
-            <p class="text-slate-500 text-sm max-w-sm">Enter a start and end date above to see the duration breakdown.</p>
-        </div>
-
-    </main>
+    <!-- Toast Notification Container -->
+    <div id="notification-container" class="fixed top-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
     <script>
         lucide.createIcons();
@@ -169,58 +280,63 @@
         // Elements
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
-        const includeEndDateCheckbox = document.getElementById('include-end-date');
         const calculateBtn = document.getElementById('calculate-btn');
         const resetBtn = document.getElementById('reset-btn');
         const resultsContainer = document.getElementById('results-container');
         const emptyState = document.getElementById('empty-state');
+        
+        // Mode Buttons
+        const btnExclude = document.getElementById('logic-exclude');
+        const btnInclude = document.getElementById('logic-include');
+        let includeEndDate = false;
 
-        // Logic
+        // --- Core Logic ---
+
+        function toggleInclude(active) {
+            includeEndDate = active;
+            if (active) {
+                btnInclude.className = 'px-4 py-2 bg-brand-base text-brand-text transition-colors border-l border-brand-line';
+                btnExclude.className = 'px-4 py-2 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors border-r border-brand-line';
+            } else {
+                btnExclude.className = 'px-4 py-2 bg-brand-base text-brand-text transition-colors border-r border-brand-line';
+                btnInclude.className = 'px-4 py-2 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors border-l border-brand-line';
+            }
+            // Auto-recalculate if inputs exist
+            if (startDateInput.value && endDateInput.value) calculateDuration();
+        }
+
         function calculateDuration() {
             const startVal = startDateInput.value;
             const endVal = endDateInput.value;
 
             if (!startVal || !endVal) {
-                // Shake button or show toast? For now, simple return
+                showNotification('Missing Input', 'Please select both a start and end date.', 'error');
                 return;
             }
 
-            const startDate = new Date(startVal);
-            const endDate = new Date(endVal);
-            const includeLastDay = includeEndDateCheckbox.checked;
+            // Standardize on 00:00:00 to ignore time/seconds completely
+            const startDate = new Date(startVal + 'T00:00:00'); 
+            const endDate = new Date(endVal + 'T00:00:00');
 
             if (endDate < startDate) {
-                alert("End date must be after start date.");
+                showNotification('Invalid Range', 'End date cannot be before start date.', 'error');
                 return;
             }
 
-            // --- 1. Total Days Calculation ---
+            // --- 1. Total Days Calculation (Finance Logic: Stripping Time) ---
             const oneDayMs = 24 * 60 * 60 * 1000;
-            // Add 1 day worth of ms if includeLastDay is true
-            let diffMs = Math.abs(endDate - startDate);
-            if (includeLastDay) diffMs += oneDayMs;
+            // Calculate absolute diff in milliseconds
+            let diffMs = endDate.getTime() - startDate.getTime();
+            // Convert to days
+            let totalDays = Math.round(diffMs / oneDayMs);
+            
+            if (includeEndDate) totalDays += 1;
 
-            const totalDays = Math.round(diffMs / oneDayMs);
-
-            // --- 2. Business Days Calculation ---
-            let businessDays = 0;
-            let current = new Date(startDate);
-            // We need a specific end point logic for the loop
-            // If includeLastDay, loop includes endDate. Else stop before.
-            const loopEnd = new Date(endDate);
-            if (includeLastDay) loopEnd.setDate(loopEnd.getDate() + 1);
-
-            while (current < loopEnd) {
-                const day = current.getDay();
-                if (day !== 0 && day !== 6) businessDays++; // 0=Sun, 6=Sat
-                current.setDate(current.getDate() + 1);
-            }
-
-            // --- 3. Years / Months / Days Breakdown ---
-            // Re-instantiate dates to avoid mutation issues from loop above
-            let d1 = new Date(startVal);
-            let d2 = new Date(endVal);
-            if (includeLastDay) d2.setDate(d2.getDate() + 1);
+            // --- 2. Years / Months / Days Breakdown ---
+            // Use fresh date objects to prevent mutation side effects
+            let d1 = new Date(startDate.getTime());
+            let d2 = new Date(endDate.getTime());
+            if (includeEndDate) d2.setDate(d2.getDate() + 1);
 
             let years = d2.getFullYear() - d1.getFullYear();
             let months = d2.getMonth() - d1.getMonth();
@@ -237,13 +353,12 @@
                 months += 12;
             }
 
-            // --- Update UI ---
-            
-            // Total Days
-            document.getElementById('res-total-days').textContent = totalDays.toLocaleString();
-            document.getElementById('res-business-days').textContent = businessDays.toLocaleString();
+            // --- 3. Term in Years Calculation (Actual/365) ---
+            const termYears = totalDays / 365;
 
-            // Breakdown
+            // --- Update UI ---
+            document.getElementById('res-total-days').textContent = totalDays.toLocaleString();
+            document.getElementById('res-term-years').textContent = termYears.toFixed(4); // Display with 4 decimal places
             document.getElementById('res-years').textContent = years;
             document.getElementById('res-months').textContent = months;
             document.getElementById('res-days').textContent = days;
@@ -255,36 +370,109 @@
             if (days > 0) parts.push(`${days} ${days === 1 ? 'day' : 'days'}`);
             if (parts.length === 0) parts.push('0 days');
             
-            // Join properly (e.g. "1 year, 2 months and 3 days") - Simplified for now
             document.getElementById('res-readable').textContent = parts.join(', ');
 
-            // Visibility
+            // Status Update
+            document.getElementById('status-dot').className = 'w-2 h-2 rounded-full bg-forest-500';
+            document.getElementById('status-text').textContent = 'Calculated';
+            document.getElementById('status-text').className = 'font-mono text-[10px] tracking-widest text-brand-forest uppercase';
+
+            // Show Results
             emptyState.classList.add('hidden');
             resultsContainer.classList.remove('hidden');
+            
+            // Only show toast on explicit click, not auto-recalc
+            if(event && event.type === 'click') {
+                showNotification('Calculation Complete', 'Duration logic successfully processed.', 'success');
+            }
         }
 
         function reset() {
             startDateInput.value = '';
             endDateInput.value = '';
-            includeEndDateCheckbox.checked = false;
+            toggleInclude(false);
+            
             resultsContainer.classList.add('hidden');
             emptyState.classList.remove('hidden');
+            
+            document.getElementById('status-dot').className = 'w-2 h-2 rounded-full bg-brass animate-pulse';
+            document.getElementById('status-text').textContent = 'Ready';
+            document.getElementById('status-text').className = 'font-mono text-[10px] tracking-widest text-brand-muted uppercase';
+            
+            showNotification('System Reset', 'Inputs have been cleared.', 'info');
         }
 
-        // Event Listeners
+        // --- Notification System ---
+        function showNotification(title, message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            const notif = document.createElement('div');
+            
+            let accentColor, iconName, bgColor;
+            if (type === 'error') {
+                accentColor = 'text-rust';
+                bgColor = 'bg-rust';
+                iconName = 'alert-triangle';
+            } else if (type === 'success') {
+                accentColor = 'text-forest-500';
+                bgColor = 'bg-forest-700';
+                iconName = 'check-circle';
+            } else {
+                accentColor = 'text-slate';
+                bgColor = 'bg-slate';
+                iconName = 'info';
+            }
+
+            notif.className = 'bg-brand-base border border-brand-line industrial-shadow p-4 w-80 pointer-events-auto flex gap-3 toast-enter relative overflow-hidden';
+            
+            notif.innerHTML = `
+                <div class="absolute left-0 top-0 bottom-0 w-1 ${bgColor}"></div>
+                <div class="${accentColor} mt-0.5 ml-1 shrink-0">
+                    <i data-lucide="${iconName}" width="16" height="16"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-mono text-[10px] tracking-[0.15em] ${accentColor} uppercase mb-1">${title}</h4>
+                    <p class="text-sm text-brand-text leading-snug">${message}</p>
+                </div>
+                <button class="text-brand-muted hover:text-brand-text transition-colors shrink-0 self-start" onclick="this.parentElement.remove()">
+                    <i data-lucide="x" width="14" height="14"></i>
+                </button>
+            `;
+
+            container.appendChild(notif);
+            lucide.createIcons({ root: notif });
+
+            setTimeout(() => {
+                if(notif.parentElement) {
+                    notif.classList.remove('toast-enter');
+                    notif.classList.add('toast-exit');
+                    setTimeout(() => notif.remove(), 300);
+                }
+            }, 4000);
+        }
+
+        // --- Modal Logic ---
+        const infoBtn = document.getElementById('info-btn');
+        const infoModal = document.getElementById('info-modal');
+        const closeInfoBtn = document.getElementById('close-info-btn');
+        const infoBackdrop = document.getElementById('info-backdrop');
+
+        const toggleInfo = (show) => {
+            if(show) infoModal.classList.remove('hidden');
+            else infoModal.classList.add('hidden');
+        };
+
+        infoBtn.addEventListener('click', () => toggleInfo(true));
+        closeInfoBtn.addEventListener('click', () => toggleInfo(false));
+        infoBackdrop.addEventListener('click', () => toggleInfo(false));
+
+        // --- Event Listeners ---
         calculateBtn.addEventListener('click', calculateDuration);
         resetBtn.addEventListener('click', reset);
+        
+        btnExclude.addEventListener('click', () => toggleInclude(false));
+        btnInclude.addEventListener('click', () => toggleInclude(true));
 
-        // Optional: Auto-calculate on change
-        startDateInput.addEventListener('change', () => {
-             if(endDateInput.value) calculateDuration();
-        });
-        endDateInput.addEventListener('change', () => {
-             if(startDateInput.value) calculateDuration();
-        });
-        includeEndDateCheckbox.addEventListener('change', () => {
-             if(startDateInput.value && endDateInput.value) calculateDuration();
-        });
+        lucide.createIcons();
 
     </script>
 </body>
