@@ -88,10 +88,10 @@
         @keyframes fadeOutTop { to { transform: translateY(-50px); opacity: 0; } }
     </style>
 </head>
-<body class="min-h-screen flex flex-col p-6 md:p-10 lg:p-16 pt-8 md:pt-10 relative selection:bg-brand-forest selection:text-brand-base">
+<body class="min-h-screen flex flex-col p-4 md:p-10 lg:p-16 pt-6 md:pt-10 relative selection:bg-brand-forest selection:text-brand-base">
 
-    <!-- Header Navigation -->
-    <div id="main-header" class="w-full max-w-7xl mx-auto mb-8 md:mb-12 flex justify-between items-end reveal-up delay-100 transition-opacity duration-300">
+    <!-- Header Navigation (Visible only when NOT in fullscreen) -->
+    <div id="main-header" class="w-full max-w-7xl mx-auto mb-8 md:mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-4 reveal-up delay-100 transition-opacity duration-300">
         <div>
             <a href="index.html" class="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] text-brand-muted hover:text-brand-forest transition-colors uppercase mb-4 group">
                 <i data-lucide="arrow-left" width="12" height="12" class="group-hover:-translate-x-1 transition-transform"></i>
@@ -102,7 +102,7 @@
         </div>
         
         <!-- Status Indicator -->
-        <div class="flex items-center gap-3 mb-1">
+        <div class="flex items-center gap-3 mb-1 w-full md:w-auto justify-between md:justify-end">
             <div class="flex items-center gap-2 px-3 py-1 border border-brand-line bg-brand-surface font-mono text-[10px] tracking-widest text-brand-muted uppercase">
                 <span id="active-maps-count">0</span> Maps Active
             </div>
@@ -116,16 +116,16 @@
     <main class="w-full max-w-7xl mx-auto reveal-up delay-200 flex-grow flex flex-col">
         
         <!-- Input Panel (Split Grid) -->
-        <div class="bg-brand-line border border-brand-line industrial-shadow grid grid-cols-1 lg:grid-cols-2 gap-px relative mb-12">
+        <div class="bg-brand-line border border-brand-line industrial-shadow grid grid-cols-1 lg:grid-cols-2 gap-px relative mb-8 md:mb-12">
 
             <!-- Section 1: Underlying Agreements -->
-            <section class="bg-brand-base p-8 md:p-10">
+            <section class="bg-brand-base p-6 md:p-10">
                 <h2 class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase flex items-center gap-2 mb-8">
                     <i data-lucide="layers" width="14" height="14" class="text-brand-text"></i>
                     01. Underlying Agreements
                 </h2>
                 <form id="underlying-form" class="space-y-8">
-                    <div class="grid grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         <div>
                             <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-forest uppercase mb-2">Customer Name</label>
                             <input type="text" name="customerName" placeholder="e.g. Acme Corp" required
@@ -138,7 +138,7 @@
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         <div>
                             <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase mb-2">Start Date</label>
                             <input type="date" name="startDate" required
@@ -151,15 +151,15 @@
                         </div>
                     </div>
 
-                    <div class="flex gap-6 items-end pt-2">
+                    <div class="flex flex-col md:flex-row gap-6 items-stretch md:items-end pt-2">
                         <div class="flex-1">
                             <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase mb-2">Timeline Color</label>
-                            <div class="flex gap-2" id="color-picker-container">
+                            <div class="flex gap-2 flex-wrap" id="color-picker-container">
                                 <!-- Color options injected by JS -->
                             </div>
                             <input type="hidden" name="color" id="underlying-color-input" value="brand">
                         </div>
-                        <button type="submit" class="font-mono text-[10px] tracking-[0.2em] text-brand-text bg-brand-surface border border-brand-line hover:bg-brand-line transition-colors px-6 py-3 uppercase flex items-center gap-2">
+                        <button type="submit" class="font-mono text-[10px] tracking-[0.2em] text-brand-text bg-brand-surface border border-brand-line hover:bg-brand-line transition-colors px-6 py-3 uppercase flex items-center justify-center gap-2 w-full md:w-auto">
                             <i data-lucide="plus" width="12" height="12"></i> Add Record
                         </button>
                     </div>
@@ -167,13 +167,13 @@
             </section>
 
             <!-- Section 2: Map New Agreement -->
-            <section class="bg-brand-base p-8 md:p-10 relative">
+            <section class="bg-brand-base p-6 md:p-10 relative">
                 <h2 class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase flex items-center gap-2 mb-8">
                     <i data-lucide="trending-up" width="14" height="14" class="text-brand-accent"></i>
                     02. Map New Agreement
                 </h2>
                 <form id="mapped-form" class="space-y-8">
-                    <div class="grid grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         <div>
                             <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-accent uppercase mb-2">Customer Name</label>
                             <input type="text" name="customerName" placeholder="e.g. Acme Global" required
@@ -186,7 +186,7 @@
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         <div>
                             <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase mb-2">Start Date</label>
                             <input type="date" name="startDate" required
@@ -200,7 +200,7 @@
                     </div>
 
                     <div class="pt-2 flex justify-end">
-                        <button type="submit" class="font-mono text-[10px] tracking-[0.2em] text-brand-base bg-brand-forest hover:bg-forest-700 transition-colors px-6 py-3 uppercase flex items-center gap-2">
+                        <button type="submit" class="font-mono text-[10px] tracking-[0.2em] text-brand-base bg-brand-forest hover:bg-forest-700 transition-colors px-6 py-3 uppercase flex items-center justify-center gap-2 w-full md:w-auto">
                             <i data-lucide="arrow-right" width="12" height="12"></i> Map Deal
                         </button>
                     </div>
@@ -212,14 +212,19 @@
         <section id="visualizer-section" class="bg-brand-line border border-brand-line industrial-shadow flex flex-col gap-px relative transition-all duration-300">
             
             <!-- Controls Bar -->
-            <div id="timeline-controls" class="bg-brand-base p-6 border-b border-brand-line flex justify-between items-center transition-all duration-300">
+            <div id="timeline-controls" class="bg-brand-base p-4 md:p-6 border-b border-brand-line flex flex-col md:flex-row justify-between items-start md:items-center gap-4 transition-all duration-300">
                 <div class="flex items-center gap-3">
                     <h3 class="font-mono text-[10px] tracking-[0.2em] text-brand-text uppercase font-bold">Timeline View</h3>
                     <div class="h-4 w-px bg-brand-line"></div>
                     <span class="font-mono text-[10px] tracking-widest text-brand-muted uppercase" id="view-range-label">Range: Auto-Fit</span>
                 </div>
                 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+                    <!-- New Info Button for Fullscreen -->
+                    <button id="timeline-info-btn" class="text-brand-muted hover:text-brand-forest transition-colors p-1" title="System Info">
+                        <i data-lucide="info" width="16" height="16"></i>
+                    </button>
+                    
                     <button id="clear-all-btn" class="font-mono text-[10px] tracking-[0.2em] text-rust hover:bg-rust-tint transition-colors px-4 py-2 uppercase border border-transparent hidden">
                         Clear All
                     </button>
@@ -229,7 +234,7 @@
             <!-- Timeline Canvas -->
             <div id="timeline-canvas-container" class="bg-brand-base relative overflow-hidden min-h-[350px] w-full">
                 <!-- Wrapper now forces fit, no scroll -->
-                <div id="timeline-content-wrapper" class="w-full h-full p-8 pb-12 box-border transition-all duration-300">
+                <div id="timeline-content-wrapper" class="w-full h-full p-4 md:p-8 pb-12 box-border transition-all duration-300">
                     <div id="timeline-container" class="relative h-full w-full">
                         <!-- Grid Lines Layer -->
                         <div id="grid-layer" class="absolute inset-0 w-full h-full pointer-events-none"></div>
@@ -292,11 +297,11 @@
                     <i data-lucide="x" width="16" height="16"></i>
                 </button>
             </div>
-            <form id="edit-form" class="p-8 space-y-6">
+            <form id="edit-form" class="p-6 md:p-8 space-y-6">
                 <input type="hidden" id="edit-id">
                 <input type="hidden" id="edit-category">
                 
-                <div class="grid grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase mb-2">Customer</label>
                         <input type="text" id="edit-customerName" name="customerName" class="w-full bg-transparent border-b border-brand-line py-1 text-brand-text text-sm focus:border-brand-forest transition-colors">
@@ -307,7 +312,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase mb-2">Start Date</label>
                         <input type="date" id="edit-startDate" name="startDate" class="w-full bg-transparent border-b border-brand-line py-1 text-brand-text text-sm font-mono focus:border-brand-forest transition-colors">
@@ -321,7 +326,7 @@
                 <!-- Conditional Color Picker in Modal -->
                 <div id="edit-color-section" class="hidden">
                     <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase mb-2">Timeline Color</label>
-                    <div class="flex gap-2" id="edit-color-picker-container">
+                    <div class="flex gap-2 flex-wrap" id="edit-color-picker-container">
                         <!-- Colors injected by JS -->
                     </div>
                     <input type="hidden" id="edit-color-input" name="color">
@@ -807,6 +812,7 @@
 
             // Info Modal
             const infoBtn = document.getElementById('info-btn');
+            const timelineInfoBtn = document.getElementById('timeline-info-btn');
             const infoModal = document.getElementById('info-modal');
             const closeInfoBtn = document.getElementById('close-info-btn');
             const infoBackdrop = document.getElementById('info-backdrop');
@@ -817,6 +823,7 @@
             };
 
             infoBtn.addEventListener('click', () => toggleInfo(true));
+            if(timelineInfoBtn) timelineInfoBtn.addEventListener('click', () => toggleInfo(true));
             closeInfoBtn.addEventListener('click', () => toggleInfo(false));
             infoBackdrop.addEventListener('click', () => toggleInfo(false));
         });
