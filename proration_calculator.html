@@ -3,245 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proration Calculator</title>
+    <title>Proration Calculator | RevOps Tools</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            base: '#F5F2EB',       /* Main Background */
+                            surface: '#EBE6DD',    /* Secondary/Hover */
+                            line: '#D4CDC1',       /* Borders/Grid Lines */
+                            text: '#3A352F',       /* Primary Text */
+                            muted: '#8C857B',      /* Secondary Text */
+                            accent: '#A4907C',     /* Accents */
+                            forest: '#1F3A2C',     /* Dark Interactive Green */
+                            forestTint: '#E6EAE6', /* Light Green Tint */
+                        },
+                        // Functional Status Colors
+                        rust: { DEFAULT: '#C86A58', tint: '#F7EAE8' },
+                        brass: '#C29A5B',
+                        slate: { DEFAULT: '#5B7B8C', tint: '#EAF0F2' },
+                        forest: { 500: '#4A6B56', 700: '#2C4F3B' } 
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
+        body {
+            background-color: #F5F2EB;
+            color: #3A352F;
+            /* Subtle organic noise texture */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Hard shadow for main container (Industrial Look) */
+        .industrial-shadow {
+            box-shadow: 8px 8px 0px 0px rgba(58,53,47,0.05);
+        }
+
+        /* Premium Reveal Animations */
+        .reveal-up {
+            opacity: 0;
+            animation: revealUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transform: translateY(40px);
+        }
+        
+        @keyframes revealUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .fade-in {
             animation: fadeIn 0.3s ease-out forwards;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        /* Custom number input styling */
+
+        /* Remove default input styling */
+        input:focus, select:focus, textarea:focus { outline: none; box-shadow: none; }
         input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        /* Toast Notification Animations */
+        .toast-enter { animation: slideInTop 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .toast-exit { animation: fadeOutTop 0.3s ease-in forwards; }
+        @keyframes slideInTop { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes fadeOutTop { to { transform: translateY(-50px); opacity: 0; } }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 pb-20">
+<body class="min-h-screen flex flex-col p-6 md:p-10 lg:p-16 pt-8 md:pt-10 relative selection:bg-brand-forest selection:text-brand-base">
 
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 relative z-40 shadow-sm sticky top-0">
-        <div class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="bg-slate-900 text-white p-2 rounded-lg">
-                    <i data-lucide="calculator" width="24" height="24"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-slate-900">Proration Calculator</h1>
-                    <p class="text-sm text-slate-500">Co-Term & Add-on Pricing</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 text-sm font-medium">
-                    <i data-lucide="calendar-check" width="14" height="14"></i>
-                    <span>Deal Desk</span>
-                </div>
-                <button id="info-btn" class="p-2 text-slate-400 hover:text-fuchsia-600 hover:bg-fuchsia-50 rounded-lg transition-colors" title="Logic Explanation">
-                    <i data-lucide="info" width="20" height="20"></i>
-                </button>
-            </div>
+    <!-- Header Navigation -->
+    <div class="w-full max-w-4xl mx-auto mb-8 md:mb-12 flex justify-between items-end reveal-up delay-100">
+        <div>
+            <a href="index.html" class="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] text-brand-muted hover:text-brand-forest transition-colors uppercase mb-4 group">
+                <i data-lucide="arrow-left" width="12" height="12" class="group-hover:-translate-x-1 transition-transform"></i>
+                Return
+            </a>
+            <h1 class="text-3xl md:text-4xl font-medium tracking-tight text-brand-text">Proration Calculator</h1>
+            <p class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase mt-2">Co-Term & Add-on Pricing</p>
         </div>
-    </header>
-
-    <main class="max-w-3xl mx-auto px-6 py-8 space-y-6">
         
-        <!-- Inputs Section -->
-        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-1 h-full bg-fuchsia-500"></div>
-            
-            <!-- Dates -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Add-on Start Date</label>
-                    <div class="relative">
-                        <input type="date" id="start-date" 
-                            class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 block w-full p-3 outline-none transition-all">
-                    </div>
+        <!-- Status Indicator -->
+        <div class="flex items-center gap-3 mb-1">
+            <span id="status-dot" class="w-2 h-2 rounded-full bg-brass animate-pulse"></span>
+            <span id="status-text" class="font-mono text-[10px] tracking-widest text-brand-muted uppercase">Ready</span>
+            <button id="info-btn" class="ml-2 text-brand-muted hover:text-brand-forest transition-colors">
+                <i data-lucide="info" width="18" height="18"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <main class="w-full max-w-4xl mx-auto reveal-up delay-200 flex-grow flex flex-col">
+        
+        <!-- 1px Hairline Grid Wrapper -->
+        <div class="bg-brand-line border border-brand-line industrial-shadow flex flex-col gap-px relative">
+
+            <!-- Input Section -->
+            <section class="bg-brand-base p-8 md:p-10">
+                <div class="flex justify-between items-end mb-8">
+                    <h2 class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase flex items-center gap-2">
+                        <i data-lucide="calendar-check" width="14" height="14" class="text-brand-text"></i>
+                        01. Deal Configuration
+                    </h2>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Contract End Date</label>
-                    <div class="relative">
-                        <input type="date" id="end-date" 
-                            class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 block w-full p-3 outline-none transition-all">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Pricing & Terms -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
-                <div class="md:col-span-2">
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Pricing Input</label>
-                        <select id="value-type" class="text-xs font-semibold text-fuchsia-700 bg-fuchsia-50 border border-fuchsia-100 rounded px-2 py-1 focus:ring-2 focus:ring-fuchsia-500 outline-none cursor-pointer">
-                            <option value="ACV">Full Annual Value (ACV)</option>
-                            <option value="TCV">Total Contract Value (TCV)</option>
-                        </select>
-                    </div>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span class="text-slate-400 font-semibold group-focus-within:text-fuchsia-500 transition-colors">$</span>
-                        </div>
-                        <input type="number" id="input-value" 
-                            class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-xl font-bold rounded-lg focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 block w-full pl-8 p-3 transition-all outline-none" 
-                            placeholder="0.00">
-                    </div>
-                    <p class="text-xs text-slate-400 mt-2" id="value-help-text">Enter the price for a full 12-month term.</p>
-                </div>
-                
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Annual Uplift / CPI (%)</label>
-                    <div class="relative">
-                        <input type="number" id="uplift-percent" 
-                            class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-lg focus:ring-2 focus:ring-fuchsia-500/20 focus:border-fuchsia-500 block w-full p-3 outline-none transition-all pr-8" 
-                            value="5.0" step="0.1" min="0">
-                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                            <span class="text-slate-400 text-xs font-bold">%</span>
-                        </div>
-                    </div>
-                    <p class="text-[10px] text-slate-400 mt-1">Applied to renewals (Years 2+).</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Results Section -->
-        <div id="results-container" class="hidden space-y-6 fade-in">
-            
-            <!-- Main Result Card (Stub) -->
-            <div class="bg-gradient-to-br from-fuchsia-600 to-purple-700 rounded-xl shadow-lg p-8 text-white relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                    <i data-lucide="receipt" width="100" height="100"></i>
-                </div>
-                
-                <div class="relative z-10 flex flex-col md:flex-row justify-between items-end gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mb-10">
+                    <!-- Start Date -->
                     <div>
-                        <div class="text-fuchsia-100 text-sm font-semibold uppercase tracking-wider mb-1">First Period Amount</div>
-                        <div class="text-5xl font-bold tracking-tight" id="res-prorated">$0.00</div>
-                        <div class="text-fuchsia-200 text-sm mt-2 font-medium">To be invoiced for current stub period</div>
+                        <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase mb-2">Add-on Start Date</label>
+                        <div class="flex items-center border-b border-brand-line focus-within:border-brand-forest transition-colors py-1 group">
+                            <input type="date" id="start-date" 
+                                class="w-full bg-transparent text-brand-text text-xl font-medium outline-none font-mono placeholder-brand-muted/50 uppercase">
+                        </div>
                     </div>
+
+                    <!-- End Date -->
+                    <div>
+                        <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase mb-2">Contract End Date</label>
+                        <div class="flex items-center border-b border-brand-line focus-within:border-brand-forest transition-colors py-1 group">
+                            <input type="date" id="end-date" 
+                                class="w-full bg-transparent text-brand-text text-xl font-medium outline-none font-mono placeholder-brand-muted/50 uppercase">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pricing & Terms -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-end">
                     
-                    <div class="text-right bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/10">
-                        <div class="text-xs text-fuchsia-100 uppercase tracking-wide mb-1">First Period Duration</div>
-                        <div class="text-2xl font-mono font-bold" id="res-percent">0%</div>
+                    <!-- Value Input -->
+                    <div>
+                        <div class="flex justify-between items-end mb-3">
+                            <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase leading-none">Pricing Input</label>
+                            
+                            <!-- Mechanical Toggle -->
+                            <div class="flex font-mono text-[9px] tracking-widest uppercase border border-brand-line bg-brand-surface cursor-pointer">
+                                <button id="type-btn-acv" class="px-3 py-1 bg-brand-base text-brand-text transition-colors border-r border-brand-line">ACV</button>
+                                <div class="w-px bg-brand-line"></div>
+                                <button id="type-btn-tcv" class="px-3 py-1 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors">TCV</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center border-b border-brand-line focus-within:border-brand-forest transition-colors py-1 group">
+                            <span class="text-brand-muted font-mono text-lg mr-2 group-focus-within:text-brand-forest transition-colors whitespace-nowrap">$</span>
+                            <input type="number" id="input-value" 
+                                class="w-full bg-transparent text-brand-text text-2xl font-medium outline-none placeholder-brand-muted/50" 
+                                placeholder="0.00">
+                        </div>
+                        <p class="text-[10px] text-brand-muted mt-2 font-mono tracking-wide uppercase" id="value-help-text">Full 12-month term value</p>
+                    </div>
+
+                    <!-- Uplift -->
+                    <div>
+                        <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase mb-2">Annual Uplift (Years 2+)</label>
+                        <div class="flex items-center border-b border-brand-line focus-within:border-brand-forest transition-colors py-1 group">
+                            <input type="number" id="uplift-percent" 
+                                class="w-full bg-transparent text-brand-text text-2xl font-medium outline-none placeholder-brand-muted/50" 
+                                value="5.0" step="0.1">
+                            <span class="text-brand-muted font-mono text-lg ml-2 group-focus-within:text-brand-forest transition-colors whitespace-nowrap">%</span>
+                        </div>
+                        <p class="text-[10px] text-brand-muted mt-2 font-mono tracking-wide uppercase">Standard CPI or Renewal Cap</p>
                     </div>
                 </div>
-            </div>
 
-            <!-- Details Grid -->
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="text-slate-400 mb-2"><i data-lucide="calendar-days" width="18" height="18"></i></div>
-                    <div class="text-xl font-bold text-slate-800" id="res-days">0</div>
-                    <div class="text-xs text-slate-500 font-medium uppercase">First Period Days</div>
+                <div class="mt-10 flex justify-end">
+                    <button id="calculate-btn" class="font-mono text-[10px] tracking-[0.2em] text-brand-base bg-brand-forest hover:bg-forest-700 transition-colors px-8 py-3 uppercase flex items-center justify-center gap-2">
+                        <i data-lucide="calculator" width="12" height="12"></i> Calculate
+                    </button>
                 </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="text-slate-400 mb-2"><i data-lucide="coins" width="18" height="18"></i></div>
-                    <div class="text-xl font-bold text-slate-800" id="res-daily-rate">$0.00</div>
-                    <div class="text-xs text-slate-500 font-medium uppercase">Daily Rate</div>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm col-span-2 md:col-span-1">
-                    <div class="text-slate-400 mb-2"><i data-lucide="calendar-range" width="18" height="18"></i></div>
-                    <div class="text-xl font-bold text-slate-800" id="res-total-months">0.0</div>
-                    <div class="text-xs text-slate-500 font-medium uppercase">Total Duration (Months)</div>
-                </div>
-            </div>
+            </section>
 
-            <!-- Subscription Fees Table -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-900 flex items-center gap-2">
-                        <i data-lucide="table-2" class="text-fuchsia-500" width="20" height="20"></i>
-                        Subscription Fee Schedule
-                    </h3>
-                    <div class="text-xs text-slate-400 bg-slate-50 px-2 py-1 rounded">
-                        Includes <span id="table-uplift-display">0%</span> annual uplift
+            <!-- Results Section -->
+            <section id="results-container" class="bg-brand-surface p-8 md:p-10 hidden fade-in border-t border-brand-line">
+                <h2 class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase flex items-center gap-2 mb-8">
+                    <i data-lucide="bar-chart-3" width="14" height="14" class="text-brand-text"></i>
+                    02. Proration Breakdown
+                </h2>
+
+                <!-- Key Metrics Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-px bg-brand-line border border-brand-line mb-8">
+                    
+                    <!-- Prorated Amount (Hero) -->
+                    <div class="bg-brand-base p-6 flex flex-col justify-between h-32 md:h-40">
+                        <span class="font-mono text-[10px] tracking-[0.15em] text-brand-forest uppercase">First Invoice Amount</span>
+                        <div class="flex items-baseline gap-2">
+                            <span id="res-prorated" class="text-4xl md:text-5xl font-medium text-brand-text tracking-tight">$0.00</span>
+                        </div>
+                        <span class="font-mono text-[9px] text-brand-muted uppercase">Invoice for First Period</span>
+                    </div>
+
+                    <!-- Factor % -->
+                    <div class="bg-brand-base p-6 flex flex-col justify-between h-32 md:h-40">
+                        <span class="font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase">Period Duration</span>
+                        <div class="flex items-baseline gap-2">
+                            <span id="res-percent" class="text-4xl md:text-5xl font-medium text-brand-accent tracking-tight">0%</span>
+                        </div>
+                        <span class="font-mono text-[9px] text-brand-muted uppercase" id="res-days">0 Days</span>
+                    </div>
+
+                    <!-- Daily Rate -->
+                    <div class="bg-brand-base p-6 flex flex-col justify-between h-32 md:h-40">
+                        <span class="font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase">Daily Rate</span>
+                        <div class="flex items-baseline gap-2">
+                            <span id="res-daily-rate" class="text-3xl md:text-4xl font-medium text-brand-text tracking-tight">$0.00</span>
+                        </div>
+                        <span class="font-mono text-[9px] text-brand-muted uppercase">Based on 365 Days</span>
                     </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider text-xs">
-                            <tr>
-                                <th class="px-6 py-3">Period</th>
-                                <th class="px-6 py-3">Start Date</th>
-                                <th class="px-6 py-3">End Date</th>
-                                <th class="px-6 py-3 text-right">Fee</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100" id="fee-schedule-body">
-                            <!-- Rows generated by JS -->
-                        </tbody>
-                        <tfoot class="bg-fuchsia-50 font-bold text-slate-900">
-                            <tr>
-                                <td class="px-6 py-4" colspan="3">Total Contract Value (TCV)</td>
-                                <td class="px-6 py-4 text-right text-fuchsia-700" id="res-tcv">$0.00</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+
+                <!-- Fee Schedule Table -->
+                <div class="border border-brand-line bg-brand-base">
+                    <div class="p-4 border-b border-brand-line bg-brand-surface flex justify-between items-center">
+                        <span class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase">Subscription Fee Schedule</span>
+                        <span class="font-mono text-[9px] text-brand-accent uppercase border border-brand-line px-2 py-0.5 bg-brand-base">
+                            Uplift: <span id="table-uplift-display">5%</span>
+                        </span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-brand-line text-brand-muted font-mono text-[10px] uppercase tracking-wider">
+                                    <th class="px-6 py-3 font-medium">Period</th>
+                                    <th class="px-6 py-3 font-medium">Start Date</th>
+                                    <th class="px-6 py-3 font-medium">End Date</th>
+                                    <th class="px-6 py-3 font-medium text-right">Fee</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-brand-line text-brand-text text-sm" id="fee-schedule-body">
+                                <!-- JS Injected Rows -->
+                            </tbody>
+                            <tfoot class="bg-brand-surface font-medium text-brand-text border-t border-brand-line">
+                                <tr>
+                                    <td class="px-6 py-4 font-mono text-[10px] uppercase tracking-widest text-brand-muted" colspan="3">Total Contract Value (TCV)</td>
+                                    <td class="px-6 py-4 text-right text-brand-forest font-bold" id="res-tcv">$0.00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
+            </section>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="bg-brand-surface p-12 flex flex-col items-center justify-center text-brand-muted border-t border-brand-line">
+                <i data-lucide="calculator" width="32" height="32" class="mb-4 opacity-50"></i>
+                <p class="font-mono text-[10px] tracking-widest uppercase">Awaiting Configuration</p>
             </div>
 
         </div>
-
-        <!-- Empty State -->
-        <div id="empty-state" class="py-12 flex flex-col items-center justify-center text-center">
-            <div class="bg-slate-100 p-4 rounded-full mb-4">
-                <i data-lucide="calendar-plus" class="text-slate-300" width="40" height="40"></i>
-            </div>
-            <h3 class="text-lg font-medium text-slate-900 mb-1">Calculate Co-Term</h3>
-            <p class="text-slate-500 text-sm max-w-sm">Enter the dates and value to calculate the year-over-year fees.</p>
-        </div>
-
     </main>
 
-    <!-- Info Modal -->
+    <!-- Footer -->
+    <footer class="max-w-4xl mx-auto px-4 md:px-8 mt-12 text-center reveal-up delay-300">
+        <span class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase">
+            Designed & Developed by <span class="text-brand-text font-medium">Jose Torres</span>
+        </span>
+    </footer>
+
+    <!-- Documentation Info Modal -->
     <div id="info-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <div id="info-backdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
-        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden fade-in z-50">
-            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 class="font-bold text-slate-900 flex items-center gap-2">
-                    <i data-lucide="info" width="18" height="18" class="text-fuchsia-500"></i>
-                    Calculation Logic
+        <div id="info-backdrop" class="absolute inset-0 bg-brand-text/10 backdrop-blur-sm transition-opacity"></div>
+        <div class="relative bg-brand-base border border-brand-line w-full max-w-lg fade-in z-50 industrial-shadow">
+            
+            <div class="px-6 py-4 border-b border-brand-line flex justify-between items-center bg-brand-surface">
+                <h3 class="font-mono text-[10px] tracking-[0.2em] text-brand-text uppercase flex items-center gap-2">
+                    <i data-lucide="file-text" width="14" height="14"></i>
+                    Documentation
                 </h3>
-                <button id="close-info-btn" class="text-slate-400 hover:text-slate-600 transition-colors">
-                    <i data-lucide="x" width="20" height="20"></i>
+                <button id="close-info-btn" class="text-brand-muted hover:text-brand-text transition-colors">
+                    <i data-lucide="x" width="16" height="16"></i>
                 </button>
             </div>
-            <div class="p-6 space-y-4 text-sm text-slate-600">
-                <div class="space-y-2">
-                    <h4 class="font-bold text-slate-800">Logic Overview</h4>
-                    <p>This tool breaks the contract duration into <strong>annual periods</strong> aligned to the Contract End Date.</p>
-                    <ul class="list-disc pl-4 space-y-1">
-                        <li><strong>Stub Period:</strong> The tool places the partial year (stub) at the <em>beginning</em> of the term to align future invoices with your standard annual renewal cycle.</li>
-                        <li><strong>Daily Rate:</strong> Calculated using a standard 365-day year basis (ACV ÷ 365).</li>
-                    </ul>
+
+            <div class="p-8 space-y-6 text-sm text-brand-text leading-relaxed">
+                <div>
+                    <h4 class="font-medium mb-2">Logic Overview</h4>
+                    <p class="text-brand-muted">This tool breaks contract durations into annual periods starting from the Add-on Start Date. The partial year (stub) is placed at the end of the term.</p>
                 </div>
 
-                <div class="space-y-2">
-                    <h4 class="font-bold text-slate-800">Inputs</h4>
-                    <ul class="list-disc pl-4 space-y-1">
-                        <li><strong>ACV (Annual Contract Value):</strong> The price for one full year. Use this if you know the annual run rate.</li>
-                        <li><strong>TCV (Total Contract Value):</strong> The total price for the entire duration. Use this if you have a lump sum budget you need to reverse-engineer.</li>
-                    </ul>
-                </div>
-
-                <div class="space-y-2 border-t border-slate-100 pt-3">
-                    <h4 class="font-bold text-slate-800">Industry Standard: Uplift & CPI</h4>
-                    <p>Most SaaS contracts include an annual uplift clause to account for inflation (CPI) and product innovation.</p>
-                    <div class="bg-slate-50 p-3 rounded border border-slate-200 text-xs">
-                        <span class="font-semibold text-fuchsia-600">Recommendation:</span> 
-                        Standard practice is <strong>CPI + 2%</strong> or a flat <strong>5-7%</strong> uplift cap. This calculator applies the uplift percentage to years 2, 3, etc.
+                <div class="border-t border-brand-line pt-6">
+                    <h4 class="font-medium mb-2">Calculation Formulas</h4>
+                    <div class="space-y-3">
+                        <div>
+                            <p class="font-mono text-[10px] tracking-wide text-brand-muted uppercase mb-1">Daily Rate</p>
+                            <div class="bg-brand-surface p-3 border border-brand-line font-mono text-[10px] tracking-wide text-center text-brand-text uppercase">
+                                Annual Value ÷ 365
+                            </div>
+                        </div>
+                        <div>
+                            <p class="font-mono text-[10px] tracking-wide text-brand-muted uppercase mb-1">Stub Fee</p>
+                            <div class="bg-brand-surface p-3 border border-brand-line font-mono text-[10px] tracking-wide text-center text-brand-text uppercase">
+                                Daily Rate × Stub Days
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Toast Notification Container -->
+    <div id="notification-container" class="fixed top-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
     <script>
         lucide.createIcons();
@@ -250,74 +324,65 @@
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
         const inputValue = document.getElementById('input-value');
-        const valueTypeSelect = document.getElementById('value-type');
         const valueHelpText = document.getElementById('value-help-text');
         const upliftPercentInput = document.getElementById('uplift-percent');
+        const btnAcv = document.getElementById('type-btn-acv');
+        const btnTcv = document.getElementById('type-btn-tcv');
         
         const resultsContainer = document.getElementById('results-container');
         const emptyState = document.getElementById('empty-state');
         
-        // Modal
-        const infoBtn = document.getElementById('info-btn');
-        const infoModal = document.getElementById('info-modal');
-        const closeInfoBtn = document.getElementById('close-info-btn');
-        const infoBackdrop = document.getElementById('info-backdrop');
+        // State
+        let valueType = 'ACV';
+
+        // --- Core Logic ---
+
+        function setInputType(type) {
+            valueType = type;
+            if (type === 'ACV') {
+                btnAcv.className = 'px-3 py-1 bg-brand-base text-brand-text transition-colors border-r border-brand-line';
+                btnTcv.className = 'px-3 py-1 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors';
+                valueHelpText.textContent = "FULL 12-MONTH TERM VALUE";
+            } else {
+                btnTcv.className = 'px-3 py-1 bg-brand-base text-brand-text transition-colors border-l border-brand-line';
+                btnAcv.className = 'px-3 py-1 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors';
+                valueHelpText.textContent = "TOTAL CONTRACT VALUE (STUB + RENEWALS)";
+            }
+            if(inputValue.value) calculate();
+        }
 
         function formatDate(date) {
             return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-        }
-
-        function updateHelpText() {
-            const type = valueTypeSelect.value;
-            if (type === 'ACV') {
-                valueHelpText.textContent = "Enter the price for a full 12-month term.";
-            } else {
-                valueHelpText.textContent = "Enter the total contract value (Stub + Renewals).";
-            }
-            calculate();
         }
 
         function calculate() {
             const startVal = startDateInput.value;
             const endVal = endDateInput.value;
             const inputVal = parseFloat(inputValue.value);
-            const valueType = valueTypeSelect.value;
             const uplift = parseFloat(upliftPercentInput.value) || 0;
 
-            if (!startVal || !endVal || isNaN(inputVal)) {
-                return;
-            }
+            if (!startVal || !endVal || isNaN(inputVal)) return;
 
             const start = new Date(startVal + 'T00:00:00');
             const end = new Date(endVal + 'T00:00:00');
 
-            if (end < start) return;
+            if (end < start) {
+                showNotification('Invalid Range', 'End date must be after start date.', 'error');
+                return;
+            }
 
-            // --- 1. Break down periods (Stub at front) ---
-            // Strategy: Calculate standard annual periods starting from End Date backwards?
-            // Or simpler: Align to End Date Month/Day.
-            
+            // 1. Break down periods (Stub at End logic)
             const periods = [];
             let currentStart = new Date(start);
             
             // Loop until we reach the end
             while (currentStart <= end) {
-                // Find the next "Annual Cycle" end date.
-                // The annual cycle aligns with the Final End Date.
-                // So the boundaries are EndDate year-1, year-2, etc.
-                // Actually, the simplest way to get "Stub at front" is:
-                // Period 1 ends on the next occurrence of (EndMonth/EndDay)
-                
+                // Calculate 1 year forward
                 let nextCycleEnd = new Date(currentStart);
-                nextCycleEnd.setMonth(end.getMonth());
-                nextCycleEnd.setDate(end.getDate());
+                nextCycleEnd.setFullYear(nextCycleEnd.getFullYear() + 1);
+                nextCycleEnd.setDate(nextCycleEnd.getDate() - 1);
                 
-                // If the derived cycle end is before current start (e.g. Start is Nov, End is Oct), move to next year
-                if (nextCycleEnd < currentStart) {
-                    nextCycleEnd.setFullYear(nextCycleEnd.getFullYear() + 1);
-                }
-                
-                // Ensure we don't go past the actual contract end
+                // Cap at contract end
                 if (nextCycleEnd > end) {
                     nextCycleEnd = new Date(end);
                 }
@@ -327,45 +392,30 @@
                     end: new Date(nextCycleEnd)
                 });
 
-                // Advance start to day after current period end
+                // Advance
                 currentStart = new Date(nextCycleEnd);
                 currentStart.setDate(currentStart.getDate() + 1);
             }
 
-            // --- 2. Calculate Factors for solving TCV/ACV ---
-            // Base ACV applies to full years. Uplift applies cumulatively.
-            // Stub is prorated off the Base ACV (Year 1 rate).
-            
+            // 2. Calculate Factors
             let totalFactor = 0;
             const oneDay = 24 * 60 * 60 * 1000;
             
-            // Prepare periods with their specific factors
             periods.forEach((p, index) => {
                 const pDays = Math.round(Math.abs((p.end - p.start) / oneDay)) + 1;
                 p.days = pDays;
                 
-                // Is this a full year? (Approx 365 or 366)
-                // For simplified pricing logic, we usually treat subsequent full years as factor 1.0, 
-                // and the first period as prorated if < 365.
-                // However, strictly mathematically:
-                
-                const isFullYear = (p.end.getMonth() === end.getMonth() && p.end.getDate() === end.getDate()) &&
-                                   (Math.abs(pDays - 365) <= 1); // tolerance for leap year
+                // Check if full year (365 or 366 for leap)
+                const isFullYear = (pDays >= 365 && pDays <= 366); 
+                p.isFullYear = isFullYear; 
+
+                const upliftMultiplier = Math.pow(1 + (uplift / 100), index); 
                 
                 let periodFactor = 0;
-                
-                // Determine Uplift Multiplier
-                // Year 1 (Stub or Full) = Base Rate (1.0)
-                // Year 2 = Base * (1 + Uplift)
-                // Year 3 = Base * (1 + Uplift)^2
-                const upliftMultiplier = Math.pow(1 + (uplift / 100), index); // Index 0 = 1.0
-                
-                if (index === 0 && !isFullYear) {
-                    // Stub Logic: Prorate the Base Rate
+                if (!isFullYear) {
+                    // Stub Logic: Prorate
                     const stubRatio = pDays / 365;
-                    periodFactor = stubRatio * upliftMultiplier; // Usually uplift applies to full years, stub is base.
-                    // If stub is at start, typically Stub is base rate prorated.
-                    // So upliftMultiplier for index 0 is 1. Correct.
+                    periodFactor = stubRatio * upliftMultiplier; 
                 } else {
                     // Full Year
                     periodFactor = 1.0 * upliftMultiplier;
@@ -375,7 +425,7 @@
                 totalFactor += periodFactor;
             });
 
-            // --- 3. Determine ACV ---
+            // 3. Determine Base ACV
             let baseAcv = 0;
             if (valueType === 'ACV') {
                 baseAcv = inputVal;
@@ -383,7 +433,7 @@
                 baseAcv = inputVal / totalFactor;
             }
 
-            // --- 4. Generate UI Data ---
+            // 4. Generate UI Data
             let totalTCV = 0;
             const tableBody = document.getElementById('fee-schedule-body');
             tableBody.innerHTML = '';
@@ -392,61 +442,117 @@
                 const fee = baseAcv * p.factor;
                 totalTCV += fee;
                 
-                const label = index === 0 && p.days < 360 ? "Year 1 (Stub)" : `Year ${index + 1}`;
+                const label = !p.isFullYear ? `Year ${index + 1} (Stub)` : `Year ${index + 1}`;
                 
                 const rowHtml = `
-                    <tr class="hover:bg-slate-50 transition-colors">
-                        <td class="px-6 py-4 font-medium text-slate-900">${label}</td>
-                        <td class="px-6 py-4 text-slate-500 font-mono text-xs">${formatDate(p.start)}</td>
-                        <td class="px-6 py-4 text-slate-500 font-mono text-xs">${formatDate(p.end)}</td>
-                        <td class="px-6 py-4 text-right font-bold text-slate-900">${fee.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
+                    <tr class="hover:bg-brand-surface transition-colors">
+                        <td class="px-6 py-4 font-medium">${label}</td>
+                        <td class="px-6 py-4 text-brand-muted font-mono text-xs uppercase">${formatDate(p.start)}</td>
+                        <td class="px-6 py-4 text-brand-muted font-mono text-xs uppercase">${formatDate(p.end)}</td>
+                        <td class="px-6 py-4 text-right font-medium">${fee.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</td>
                     </tr>
                 `;
                 tableBody.innerHTML += rowHtml;
             });
 
-            // --- 5. Update Summary Cards (First Period) ---
+            // 5. Update Summary Cards
             const firstP = periods[0];
             const firstFee = baseAcv * firstP.factor;
             const dailyRate = baseAcv / 365;
             
-            // Total Duration calc
-            const totalDays = Math.round(Math.abs((end - start) / oneDay)) + 1;
-            const totalMonths = (totalDays / 30.44).toFixed(1);
-
             document.getElementById('res-prorated').textContent = firstFee.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-            // Percent of a full year that the stub represents
             document.getElementById('res-percent').textContent = ((firstP.days / 365) * 100).toFixed(1) + '%';
-            document.getElementById('res-days').textContent = firstP.days;
+            document.getElementById('res-days').textContent = `${firstP.days} Days`;
             document.getElementById('res-daily-rate').textContent = dailyRate.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-            document.getElementById('res-total-months').textContent = totalMonths;
             document.getElementById('table-uplift-display').textContent = uplift + '%';
             document.getElementById('res-tcv').textContent = totalTCV.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 
+            // UI Update
             resultsContainer.classList.remove('hidden');
             emptyState.classList.add('hidden');
+            
+            document.getElementById('status-dot').className = 'w-2 h-2 rounded-full bg-forest-500';
+            document.getElementById('status-text').textContent = 'Calculated';
+            document.getElementById('status-text').className = 'font-mono text-[10px] tracking-widest text-brand-forest uppercase';
+            
+            // Only show toast on manual click
+            if(event && event.type === 'click') {
+                showNotification('Calculation Complete', 'Proration schedule successfully generated.', 'success');
+            }
         }
 
-        // Event Listeners
-        startDateInput.addEventListener('input', calculate);
-        endDateInput.addEventListener('input', calculate);
-        inputValue.addEventListener('input', calculate);
-        valueTypeSelect.addEventListener('change', updateHelpText);
-        upliftPercentInput.addEventListener('input', calculate);
-
-        // Modal Logic
-        const toggleModal = (show) => {
-            if (show) {
-                infoModal.classList.remove('hidden');
-                setTimeout(() => infoModal.firstElementChild.classList.remove('opacity-0'), 10);
+        // --- Notification System ---
+        function showNotification(title, message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            const notif = document.createElement('div');
+            
+            let accentColor, iconName, bgColor;
+            if (type === 'error') {
+                accentColor = 'text-rust';
+                bgColor = 'bg-rust';
+                iconName = 'alert-triangle';
+            } else if (type === 'success') {
+                accentColor = 'text-forest-500';
+                bgColor = 'bg-forest-700';
+                iconName = 'check-circle';
             } else {
-                infoModal.classList.add('hidden');
+                accentColor = 'text-slate';
+                bgColor = 'bg-slate';
+                iconName = 'info';
             }
+
+            notif.className = 'bg-brand-base border border-brand-line industrial-shadow p-4 w-80 pointer-events-auto flex gap-3 toast-enter relative overflow-hidden';
+            
+            notif.innerHTML = `
+                <div class="absolute left-0 top-0 bottom-0 w-1 ${bgColor}"></div>
+                <div class="${accentColor} mt-0.5 ml-1 shrink-0">
+                    <i data-lucide="${iconName}" width="16" height="16"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-mono text-[10px] tracking-[0.15em] ${accentColor} uppercase mb-1">${title}</h4>
+                    <p class="text-sm text-brand-text leading-snug">${message}</p>
+                </div>
+                <button class="text-brand-muted hover:text-brand-text transition-colors shrink-0 self-start" onclick="this.parentElement.remove()">
+                    <i data-lucide="x" width="14" height="14"></i>
+                </button>
+            `;
+
+            container.appendChild(notif);
+            lucide.createIcons({ root: notif });
+
+            setTimeout(() => {
+                if(notif.parentElement) {
+                    notif.classList.remove('toast-enter');
+                    notif.classList.add('toast-exit');
+                    setTimeout(() => notif.remove(), 300);
+                }
+            }, 4000);
+        }
+
+        // --- Modal Logic ---
+        const infoBtn = document.getElementById('info-btn');
+        const infoModal = document.getElementById('info-modal');
+        const closeInfoBtn = document.getElementById('close-info-btn');
+        const infoBackdrop = document.getElementById('info-backdrop');
+
+        const toggleInfo = (show) => {
+            if(show) infoModal.classList.remove('hidden');
+            else infoModal.classList.add('hidden');
         };
 
-        infoBtn.addEventListener('click', () => toggleModal(true));
-        closeInfoBtn.addEventListener('click', () => toggleModal(false));
-        infoBackdrop.addEventListener('click', () => toggleModal(false));
+        infoBtn.addEventListener('click', () => toggleInfo(true));
+        closeInfoBtn.addEventListener('click', () => toggleInfo(false));
+        infoBackdrop.addEventListener('click', () => toggleInfo(false));
+
+        // --- Event Listeners ---
+        const calcBtn = document.getElementById('calculate-btn');
+        calcBtn.addEventListener('click', calculate);
+        
+        btnAcv.addEventListener('click', () => setInputType('ACV'));
+        btnTcv.addEventListener('click', () => setInputType('TCV'));
+
+        // Initialize icons
+        lucide.createIcons();
 
     </script>
 </body>
