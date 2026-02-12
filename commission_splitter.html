@@ -3,218 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Commission Splitter</title>
+    <title>Commission Splitter | RevOps Tools</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            base: '#F5F2EB',       /* Main Background */
+                            surface: '#EBE6DD',    /* Secondary/Hover */
+                            line: '#D4CDC1',       /* Borders/Grid Lines */
+                            text: '#3A352F',       /* Primary Text */
+                            muted: '#8C857B',      /* Secondary Text */
+                            accent: '#A4907C',     /* Accents */
+                            forest: '#1F3A2C',     /* Dark Interactive Green */
+                            forestTint: '#E6EAE6', /* Light Green Tint */
+                        },
+                        // Functional Status Colors
+                        rust: { DEFAULT: '#C86A58', tint: '#F7EAE8' },
+                        brass: '#C29A5B',
+                        slate: { DEFAULT: '#5B7B8C', tint: '#EAF0F2' },
+                        forest: { 500: '#4A6B56', 700: '#2C4F3B' } 
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
+        body {
+            background-color: #F5F2EB;
+            color: #3A352F;
+            /* Subtle organic noise texture */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Hard shadow for main container (Industrial Look) */
+        .industrial-shadow {
+            box-shadow: 8px 8px 0px 0px rgba(58,53,47,0.05);
+        }
+
+        /* Premium Reveal Animations */
+        .reveal-up {
+            opacity: 0;
+            animation: revealUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transform: translateY(40px);
+        }
+        
+        @keyframes revealUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .fade-in {
             animation: fadeIn 0.3s ease-out forwards;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        /* Staggered Delays */
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+
         /* Custom number input styling */
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
             margin: 0; 
         }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
+
+        /* Remove default blue outline on focus */
+        input:focus {
+            outline: none;
+            box-shadow: none;
         }
-        /* Toggle Switch */
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #4f46e5;
+
+        /* Toast Notification Animations */
+        .toast-enter {
+            animation: slideInTop 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #4f46e5;
+        .toast-exit {
+            animation: fadeOutTop 0.3s ease-in forwards;
+        }
+        @keyframes slideInTop {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeOutTop {
+            to { transform: translateY(-50px); opacity: 0; }
         }
     </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 pb-20">
+<body class="min-h-screen flex flex-col p-6 md:p-10 lg:p-16 pt-8 md:pt-10 relative selection:bg-brand-forest selection:text-brand-base">
 
-    <!-- Header -->
-    <header class="bg-white border-b border-slate-200 relative z-40 shadow-sm sticky top-0">
-        <div class="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="bg-slate-900 text-white p-2 rounded-lg">
-                    <i data-lucide="pie-chart" width="24" height="24"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-slate-900">Commission Splitter</h1>
-                    <p class="text-sm text-slate-500">ACV Distribution Tool</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-3">
-                <div id="status-indicator" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 text-sm font-medium transition-colors">
-                    <div class="w-2 h-2 rounded-full bg-slate-400" id="status-dot"></div>
-                    <span id="status-text">Setup</span>
-                </div>
-                <button id="info-btn" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="How it works">
-                    <i data-lucide="info" width="20" height="20"></i>
-                </button>
-            </div>
+    <!-- Header Navigation -->
+    <div class="w-full max-w-4xl mx-auto mb-8 md:mb-12 flex justify-between items-end reveal-up delay-100">
+        <div>
+            <a href="index.html" class="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.2em] text-brand-muted hover:text-brand-forest transition-colors uppercase mb-4 group">
+                <i data-lucide="arrow-left" width="12" height="12" class="group-hover:-translate-x-1 transition-transform"></i>
+                Return
+            </a>
+            <h1 class="text-3xl md:text-4xl font-medium tracking-tight text-brand-text">Commission Splitter</h1>
+            <p class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase mt-2">ACV Distribution Engine</p>
         </div>
-    </header>
-
-    <main class="max-w-3xl mx-auto px-6 py-8 space-y-6">
         
-        <!-- Commission Basis Section (New) -->
-        <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
-            
-            <!-- Deal Type Toggle -->
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2">
-                    <i data-lucide="calculator" width="16" height="16" class="text-indigo-500"></i>
-                    Commission Basis
-                </h2>
-                
-                <div class="flex items-center gap-3">
-                    <span class="text-xs font-medium text-slate-500" id="mode-label-standard">New Business</span>
-                    <button id="mode-toggle" class="relative inline-flex h-6 w-11 items-center rounded-full bg-slate-200 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" role="switch" aria-checked="false">
-                        <span id="mode-toggle-thumb" class="translate-x-1 inline-block h-4 w-4 transform rounded-full bg-white transition transition-transform"></span>
-                    </button>
-                    <span class="text-xs font-medium text-slate-400" id="mode-label-incremental">Supersede / Upsell</span>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Contract ACV Input -->
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Total Contract ACV ($)</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span class="text-slate-400 font-semibold group-focus-within:text-indigo-500 transition-colors">$</span>
-                        </div>
-                        <input type="number" id="acv-input" 
-                            class="w-full bg-slate-50 border border-slate-200 text-slate-900 text-lg font-bold rounded-lg focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 block w-full pl-8 p-3 transition-all outline-none" 
-                            placeholder="0.00" value="10000">
-                    </div>
-                </div>
-
-                <!-- Baseline / Carve Out (Hidden by default) -->
-                <div id="baseline-container" class="hidden fade-in">
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Renewal Baseline (Carve Out)</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span class="text-red-400 font-semibold transition-colors">- $</span>
-                        </div>
-                        <input type="number" id="baseline-input" 
-                            class="w-full bg-red-50 border border-red-200 text-red-900 text-lg font-bold rounded-lg focus:ring-2 focus:ring-red-500/20 focus:border-red-500 block w-full pl-10 p-3 transition-all outline-none" 
-                            placeholder="0.00" value="0">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Net Calculation Display -->
-            <div id="net-acv-display" class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center hidden fade-in">
-                <div class="text-xs text-slate-500">
-                    <span class="font-medium">Calculation:</span> Total ACV - Baseline = Net New
-                </div>
-                <div class="text-right">
-                    <span class="text-xs text-indigo-600 font-bold uppercase tracking-wider block mb-1">Commissionable Amount</span>
-                    <span class="text-2xl font-bold text-slate-900 font-mono" id="net-acv-value">$10,000.00</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- Splits Section -->
-        <section>
-            <div class="flex justify-between items-center mb-4 px-1">
-                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Split Configuration</label>
-                
-                <!-- Split Count Controls -->
-                <div class="flex items-center gap-2 bg-white rounded-lg border border-slate-200 p-1 shadow-sm">
-                    <button id="decrease-splits" class="p-1.5 hover:bg-slate-100 text-slate-500 rounded transition-colors">
-                        <i data-lucide="minus" width="14" height="14"></i>
-                    </button>
-                    <span id="splits-count-display" class="text-sm font-bold text-slate-700 w-6 text-center">2</span>
-                    <button id="increase-splits" class="p-1.5 hover:bg-slate-100 text-slate-500 rounded transition-colors">
-                        <i data-lucide="plus" width="14" height="14"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Progress Bar (Total Allocation) -->
-            <div class="sticky top-20 z-30 bg-slate-50/90 backdrop-blur-md py-2 -mx-2 px-2 rounded-lg mb-4">
-                <div class="flex justify-between items-end mb-1 px-1">
-                    <label class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Allocation Progress</label>
-                    <div class="text-sm font-mono font-bold" id="total-percent-display">0%</div>
-                </div>
-                <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden shadow-inner relative">
-                    <div id="progress-bar" class="bg-indigo-500 h-3 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
-                    <div class="absolute right-0 top-0 bottom-0 w-px bg-white/50 z-10"></div>
-                </div>
-                <div id="validation-msg" class="text-right text-xs mt-1 font-medium h-4 transition-colors text-slate-400">
-                    Start adding percentages
-                </div>
-            </div>
-
-            <!-- Dynamic Splits Container -->
-            <div id="splits-container" class="space-y-3">
-                <!-- Rows generated by JS -->
-            </div>
-        </section>
-
-        <!-- Quick Actions -->
-        <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
-             <button id="distribute-btn" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-indigo-50 transition-colors">
-                <i data-lucide="scale" width="16" height="16"></i>
-                Distribute Evenly
-            </button>
-            <button id="reset-btn" class="text-sm text-slate-500 hover:text-slate-700 font-medium flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-slate-100 transition-colors">
-                <i data-lucide="rotate-ccw" width="16" height="16"></i>
-                Reset
+        <!-- Status Indicator -->
+        <div class="flex items-center gap-3 mb-1">
+            <span id="status-dot" class="w-2 h-2 rounded-full bg-brass animate-pulse"></span>
+            <span id="status-text" class="font-mono text-[10px] tracking-widest text-brand-muted uppercase">Setup</span>
+            <button id="info-btn" class="ml-2 text-brand-muted hover:text-brand-forest transition-colors">
+                <i data-lucide="info" width="18" height="18"></i>
             </button>
         </div>
+    </div>
 
+    <!-- Main Content Grid -->
+    <main class="w-full max-w-4xl mx-auto reveal-up delay-200">
+        
+        <!-- 1px Hairline Grid Wrapper -->
+        <div class="bg-brand-line border border-brand-line industrial-shadow flex flex-col gap-px relative">
+
+            <!-- Section 1: Basis Input -->
+            <section class="bg-brand-base p-8 md:p-10">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+                    <h2 class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase flex items-center gap-2">
+                        <i data-lucide="calculator" width="14" height="14" class="text-brand-text"></i>
+                        01. Commission Basis
+                    </h2>
+                    
+                    <!-- Mechanical Segmented Toggle -->
+                    <div class="flex font-mono text-[10px] tracking-[0.15em] uppercase border border-brand-line bg-brand-surface">
+                        <button id="mode-btn-standard" class="px-4 py-2 bg-brand-base text-brand-text transition-colors">
+                            New Business
+                        </button>
+                        <div class="w-px bg-brand-line"></div>
+                        <button id="mode-btn-incremental" class="px-4 py-2 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors">
+                            Upsell / Supersede
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start">
+                    
+                    <!-- Value Input Container -->
+                    <div class="space-y-8">
+                        <div>
+                            <!-- Header/Labels Row -->
+                            <div class="flex justify-between items-end mb-3 h-5">
+                                <label id="main-val-label" class="block font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase leading-none">Annual Contract Value (ACV)</label>
+                                
+                                <!-- Input Type Toggle -->
+                                <div class="flex font-mono text-[9px] tracking-widest uppercase border border-brand-line bg-brand-surface cursor-pointer">
+                                    <button id="type-btn-acv" class="px-2 py-0.5 bg-brand-base text-brand-text transition-colors">ACV</button>
+                                    <div class="w-px bg-brand-line"></div>
+                                    <button id="type-btn-tcv" class="px-2 py-0.5 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors">TCV</button>
+                                </div>
+                            </div>
+
+                            <!-- Main Input field -->
+                            <div class="flex items-center border-b border-brand-line focus-within:border-brand-forest transition-colors py-1 group">
+                                <span class="text-brand-muted font-mono text-lg mr-2 group-focus-within:text-brand-forest transition-colors whitespace-nowrap">$</span>
+                                <input type="number" id="acv-input" 
+                                    class="w-full bg-transparent text-brand-text text-2xl md:text-3xl font-medium outline-none placeholder-brand-muted/50" 
+                                    placeholder="0.00" value="10000">
+                            </div>
+
+                            <!-- Conditional TCV dates & calc output -->
+                            <div id="tcv-dates-container" class="hidden fade-in mt-4">
+                                <div class="flex gap-4 mb-2">
+                                    <div class="flex-1 border-b border-brand-line focus-within:border-brand-forest py-1 transition-colors group">
+                                        <label class="block font-mono text-[9px] tracking-widest text-brand-muted uppercase mb-1 group-focus-within:text-brand-forest transition-colors">Start Date</label>
+                                        <input type="date" id="tcv-start" class="w-full bg-transparent text-brand-text text-sm font-medium outline-none font-mono">
+                                    </div>
+                                    <div class="flex-1 border-b border-brand-line focus-within:border-brand-forest py-1 transition-colors group">
+                                        <label class="block font-mono text-[9px] tracking-widest text-brand-muted uppercase mb-1 group-focus-within:text-brand-forest transition-colors">End Date</label>
+                                        <input type="date" id="tcv-end" class="w-full bg-transparent text-brand-text text-sm font-medium outline-none font-mono">
+                                    </div>
+                                </div>
+                                <div class="font-mono text-[10px] tracking-[0.15em] text-brand-forest uppercase">
+                                    Implied ACV: <span id="tcv-calc-val" class="font-medium">$10,000.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Col: Commission % & Carve Out -->
+                    <div class="space-y-8">
+                        <!-- Commission Rate Input -->
+                        <div>
+                            <div class="flex justify-between items-end mb-3 h-5">
+                                <label class="block font-mono text-[10px] tracking-[0.15em] text-brand-forest uppercase leading-none">Commission Rate</label>
+                            </div>
+                            <div class="flex items-center border-b border-brand-line focus-within:border-brand-forest transition-colors py-1 group">
+                                <input type="number" id="commission-rate-input" 
+                                    class="w-full bg-transparent text-brand-text text-2xl md:text-3xl font-medium outline-none placeholder-brand-muted/50" 
+                                    placeholder="10" value="10" step="0.1">
+                                <span class="text-brand-muted font-mono text-lg ml-2 group-focus-within:text-brand-forest transition-colors whitespace-nowrap">%</span>
+                            </div>
+                        </div>
+
+                        <!-- Baseline ACV (Conditional) -->
+                        <div id="baseline-container" class="hidden fade-in">
+                            <div class="flex justify-between items-end mb-3 h-5">
+                                <label class="block font-mono text-[10px] tracking-[0.15em] text-rust uppercase leading-none">Carve Out</label>
+                            </div>
+                            <div class="flex items-center border-b border-brand-line focus-within:border-rust transition-colors py-1 group">
+                                <span class="text-rust font-mono text-lg mr-2 group-focus-within:text-rust transition-colors whitespace-nowrap">-$</span>
+                                <input type="number" id="baseline-input" 
+                                    class="w-full bg-transparent text-brand-text text-2xl md:text-3xl font-medium outline-none placeholder-brand-muted/50" 
+                                    placeholder="0.00" value="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Net Calculation Output -->
+                <div id="net-acv-display" class="mt-8 pt-6 border-t border-brand-line flex justify-between items-end hidden fade-in">
+                    <div class="font-mono text-[10px] tracking-[0.1em] text-brand-muted uppercase">
+                        Equation: (ACV - Carve Out) * Rate = Total Payout
+                    </div>
+                    <div class="text-right">
+                        <span class="font-mono text-[10px] tracking-[0.15em] text-brand-forest uppercase block mb-1">Total Commission Pool</span>
+                        <span class="text-2xl font-medium text-brand-text" id="total-payout-value">$1,000.00</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Splits -->
+            <section class="bg-brand-base p-8 md:p-10">
+                <div class="flex justify-between items-end mb-8">
+                    <h2 class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase flex items-center gap-2">
+                        <i data-lucide="git-merge" width="14" height="14" class="text-brand-text"></i>
+                        02. Split Configuration
+                    </h2>
+                    
+                    <!-- Split Count Controls -->
+                    <div class="flex items-center border border-brand-line bg-brand-base font-mono text-xs">
+                        <button id="decrease-splits" class="p-2 hover:bg-brand-surface text-brand-muted transition-colors">
+                            <i data-lucide="minus" width="14" height="14"></i>
+                        </button>
+                        <div class="w-px h-6 bg-brand-line"></div>
+                        <span id="splits-count-display" class="w-10 text-center text-brand-text font-medium">2</span>
+                        <div class="w-px h-6 bg-brand-line"></div>
+                        <button id="increase-splits" class="p-2 hover:bg-brand-surface text-brand-muted transition-colors">
+                            <i data-lucide="plus" width="14" height="14"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="mb-10">
+                    <div class="flex justify-between items-end mb-2">
+                        <label class="font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase">Allocation Progress</label>
+                        <div class="font-mono text-xs font-medium text-brand-text" id="total-percent-display">0%</div>
+                    </div>
+                    <!-- Flat Track -->
+                    <div class="w-full bg-brand-line h-2 relative">
+                        <div id="progress-bar" class="bg-brass h-2 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)" style="width: 0%"></div>
+                    </div>
+                    <div id="validation-msg" class="text-right font-mono text-[10px] tracking-widest mt-2 h-4 transition-colors text-brass uppercase">
+                        Awaiting Configuration
+                    </div>
+                </div>
+
+                <!-- Dynamic Splits List -->
+                <div class="border-t border-brand-line pt-2">
+                    <div class="flex justify-between font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase pb-4 px-4 hidden sm:flex">
+                        <div class="flex-1 pl-8">Recipient</div>
+                        <div class="flex gap-4 w-[60%] justify-end">
+                            <div class="w-20 text-right">Share (%)</div>
+                            <div class="w-28 text-right">Credit (ACV)</div>
+                            <div class="w-28 text-right text-brand-forest">Payout ($)</div>
+                            <div class="w-6"></div> <!-- Spacer for delete button -->
+                        </div>
+                    </div>
+                    
+                    <div id="splits-container" class="space-y-0">
+                        <!-- Rows injected via JS -->
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex justify-between mt-8 pt-8 border-t border-brand-line">
+                    <button id="reset-btn" class="font-mono text-[10px] tracking-[0.2em] text-rust hover:bg-rust-tint transition-colors px-4 py-3 uppercase border border-transparent">
+                        Reset All
+                    </button>
+                    <button id="distribute-btn" class="font-mono text-[10px] tracking-[0.2em] text-brand-text bg-brand-surface border border-brand-line hover:bg-brand-line transition-colors px-6 py-3 uppercase flex items-center gap-2">
+                        <i data-lucide="scale" width="12" height="12"></i>
+                        Distribute Evenly
+                    </button>
+                </div>
+            </section>
+        </div>
     </main>
 
-    <!-- Calculation Info Modal -->
+    <!-- Footer -->
+    <footer class="max-w-4xl mx-auto px-4 md:px-8 mt-12 text-center reveal-up delay-300">
+        <span class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase">
+            Designed & Developed by <span class="text-brand-text font-medium">Jose Torres</span>
+        </span>
+    </footer>
+
+    <!-- Calculation Info Modal (Flat Spec Style) -->
     <div id="info-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
-        <div id="info-backdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
-        <div class="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden fade-in z-50">
-            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 class="font-bold text-slate-900 flex items-center gap-2">
-                    <i data-lucide="calculator" width="18" height="18" class="text-indigo-500"></i>
-                    Calculation Logic
+        <div id="info-backdrop" class="absolute inset-0 bg-brand-text/10 backdrop-blur-sm transition-opacity"></div>
+        <div class="relative bg-brand-base border border-brand-line w-full max-w-lg fade-in z-50 industrial-shadow">
+            
+            <div class="px-6 py-4 border-b border-brand-line flex justify-between items-center bg-brand-surface">
+                <h3 class="font-mono text-[10px] tracking-[0.2em] text-brand-text uppercase flex items-center gap-2">
+                    <i data-lucide="file-text" width="14" height="14"></i>
+                    Documentation
                 </h3>
-                <button id="close-info-btn" class="text-slate-400 hover:text-slate-600 transition-colors">
-                    <i data-lucide="x" width="20" height="20"></i>
+                <button id="close-info-btn" class="text-brand-muted hover:text-brand-text transition-colors">
+                    <i data-lucide="x" width="16" height="16"></i>
                 </button>
             </div>
-            <div class="p-6 space-y-4 text-sm text-slate-600">
-                <div class="space-y-2">
-                    <h4 class="font-bold text-slate-800">Net New ACV Logic</h4>
-                    <p>In "Supersede / Upsell" mode, the tool calculates the <strong>Incremental</strong> or <strong>Net New</strong> value to prevent paying commissions on existing revenue.</p>
-                    <div class="bg-slate-50 p-3 rounded border border-slate-200 font-mono text-xs text-center text-slate-700">
-                        Total New ACV - Renewal Baseline = <span class="text-indigo-600 font-bold">Commissionable Amount</span>
+
+            <div class="p-8 space-y-6 text-sm text-brand-text leading-relaxed">
+                <div>
+                    <h4 class="font-medium mb-2">System Objective</h4>
+                    <p class="text-brand-muted">I have frequently observed Deal Desk teams calculating these values in non-standard, ad-hoc ways that can easily result in costly errors. Standardizing these calculations within a rigid, user-friendly interface ensures consistently accurate and auditable commission distributions.</p>
+                </div>
+
+                <div class="border-t border-brand-line pt-6">
+                    <h4 class="font-medium mb-2">Net New ACV Logic</h4>
+                    <p class="text-brand-muted">In "Upsell / Supersede" mode, the tool calculates the incremental value to prevent paying commissions on existing renewal revenue. If using TCV, it is annualized first.</p>
+                    <div class="bg-brand-surface p-4 mt-3 border border-brand-line font-mono text-[10px] tracking-wide text-center text-brand-text uppercase">
+                        (Calculated ACV - Carve Out) * Rate = Total Payout
                     </div>
                 </div>
 
-                <div class="space-y-2 border-t border-slate-100 pt-3">
-                    <h4 class="font-bold text-slate-800">Split Logic</h4>
-                    <p>The resulting Commissionable Amount is then distributed based on the percentages you define.</p>
-                    <ul class="list-none pl-0 mt-1 space-y-1 text-xs">
-                        <li class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 
-                            <span class="text-emerald-700">Green Bar:</span> Allocations total exactly 100%.
+                <div class="border-t border-brand-line pt-6">
+                    <h4 class="font-medium mb-2">Validation Logic</h4>
+                    <p class="text-brand-muted mb-3">The system automatically validates total allocations against the 100% boundary.</p>
+                    <ul class="font-mono text-[10px] tracking-widest uppercase space-y-3">
+                        <li class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-forest-500"></span> 
+                            <span class="text-brand-muted">Balanced (Exactly 100%)</span>
                         </li>
-                        <li class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-red-500"></span> 
-                            <span class="text-red-700">Red Bar:</span> Allocations exceed 100%.
+                        <li class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-brass"></span> 
+                            <span class="text-brand-muted">Incomplete (< 100%)</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="w-2 h-2 rounded-full bg-rust"></span> 
+                            <span class="text-brand-muted">Over Limit (> 100%)</span>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Toast Notification Container -->
+    <div id="notification-container" class="fixed top-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
     <script>
         lucide.createIcons();
@@ -223,19 +377,25 @@
         let totalAcv = 10000;
         let baselineAcv = 0;
         let netAcv = 10000;
+        let commissionRate = 10;
+        let totalPayout = 1000;
         let isIncrementalMode = false;
+        let valType = 'acv';
         let splitCount = 2;
+        let hasAlertedOverrun = false;
+        let hasAlertedDateError = false;
         let splits = [
-            { id: 1, percent: 50 },
-            { id: 2, percent: 50 }
+            { id: 1, name: 'Rep 1', percent: 50 },
+            { id: 2, name: 'Rep 2', percent: 50 }
         ];
 
-        // Elements
+        // DOM Elements
         const acvInput = document.getElementById('acv-input');
         const baselineInput = document.getElementById('baseline-input');
+        const commissionRateInput = document.getElementById('commission-rate-input');
         const baselineContainer = document.getElementById('baseline-container');
         const netAcvDisplay = document.getElementById('net-acv-display');
-        const netAcvValue = document.getElementById('net-acv-value');
+        const totalPayoutValue = document.getElementById('total-payout-value');
         
         const decreaseBtn = document.getElementById('decrease-splits');
         const increaseBtn = document.getElementById('increase-splits');
@@ -247,15 +407,22 @@
         const validationMsg = document.getElementById('validation-msg');
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
-        const statusIndicator = document.getElementById('status-indicator');
+        
         const distributeBtn = document.getElementById('distribute-btn');
         const resetBtn = document.getElementById('reset-btn');
         
-        // Mode Toggle
-        const modeToggle = document.getElementById('mode-toggle');
-        const modeToggleThumb = document.getElementById('mode-toggle-thumb');
-        const labelStandard = document.getElementById('mode-label-standard');
-        const labelIncremental = document.getElementById('mode-label-incremental');
+        // Mode Buttons (Mechanical Segmented Control)
+        const btnStandard = document.getElementById('mode-btn-standard');
+        const btnIncremental = document.getElementById('mode-btn-incremental');
+
+        // ACV / TCV Elements
+        const btnValAcv = document.getElementById('type-btn-acv');
+        const btnValTcv = document.getElementById('type-btn-tcv');
+        const tcvDatesContainer = document.getElementById('tcv-dates-container');
+        const tcvStart = document.getElementById('tcv-start');
+        const tcvEnd = document.getElementById('tcv-end');
+        const tcvCalcVal = document.getElementById('tcv-calc-val');
+        const mainValLabel = document.getElementById('main-val-label');
 
         // Modal Elements
         const infoBtn = document.getElementById('info-btn');
@@ -263,41 +430,104 @@
         const closeInfoBtn = document.getElementById('close-info-btn');
         const infoBackdrop = document.getElementById('info-backdrop');
 
+        // --- Notification System ---
+
+        function showNotification(title, message, type = 'info') {
+            const container = document.getElementById('notification-container');
+            const notif = document.createElement('div');
+            
+            let accentColor, iconName, bgColor;
+            if (type === 'error') {
+                accentColor = 'text-rust';
+                bgColor = 'bg-rust';
+                iconName = 'alert-triangle';
+            } else if (type === 'success') {
+                accentColor = 'text-forest-500';
+                bgColor = 'bg-forest-700';
+                iconName = 'check-circle';
+            } else {
+                accentColor = 'text-slate';
+                bgColor = 'bg-slate';
+                iconName = 'info';
+            }
+
+            notif.className = 'bg-brand-base border border-brand-line industrial-shadow p-4 w-80 pointer-events-auto flex gap-3 toast-enter relative overflow-hidden';
+            
+            notif.innerHTML = `
+                <div class="absolute left-0 top-0 bottom-0 w-1 ${bgColor}"></div>
+                <div class="${accentColor} mt-0.5 ml-1 shrink-0">
+                    <i data-lucide="${iconName}" width="16" height="16"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-mono text-[10px] tracking-[0.15em] ${accentColor} uppercase mb-1">${title}</h4>
+                    <p class="text-sm text-brand-text leading-snug">${message}</p>
+                </div>
+                <button class="text-brand-muted hover:text-brand-text transition-colors shrink-0 self-start" onclick="this.parentElement.remove()">
+                    <i data-lucide="x" width="14" height="14"></i>
+                </button>
+            `;
+
+            container.appendChild(notif);
+            lucide.createIcons({ root: notif });
+
+            // Auto-dismiss after 4 seconds
+            setTimeout(() => {
+                if(notif.parentElement) {
+                    notif.classList.remove('toast-enter');
+                    notif.classList.add('toast-exit');
+                    setTimeout(() => notif.remove(), 300);
+                }
+            }, 4000);
+        }
+
         // --- Core Logic ---
 
         function init() {
+            // Set default dates for TCV logic (1 year term)
+            const today = new Date();
+            const nextYear = new Date();
+            nextYear.setFullYear(today.getFullYear() + 1);
+            
+            tcvStart.value = today.toISOString().split('T')[0];
+            tcvEnd.value = nextYear.toISOString().split('T')[0];
+
             renderSplits();
             updateCalculations();
         }
 
-        function toggleMode() {
-            isIncrementalMode = !isIncrementalMode;
+        function setValType(type) {
+            valType = type;
+            if (type === 'tcv') {
+                btnValTcv.className = 'px-2 py-0.5 bg-brand-base text-brand-text transition-colors';
+                btnValAcv.className = 'px-2 py-0.5 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors';
+                tcvDatesContainer.classList.remove('hidden');
+                mainValLabel.textContent = 'Total Contract Value (TCV)';
+            } else {
+                btnValAcv.className = 'px-2 py-0.5 bg-brand-base text-brand-text transition-colors';
+                btnValTcv.className = 'px-2 py-0.5 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors';
+                tcvDatesContainer.classList.add('hidden');
+                mainValLabel.textContent = 'Annual Contract Value (ACV)';
+            }
+            updateCalculations();
+        }
+
+        function setMode(mode) {
+            isIncrementalMode = (mode === 'incremental');
             
-            // UI Updates
             if (isIncrementalMode) {
-                modeToggle.classList.remove('bg-slate-200');
-                modeToggle.classList.add('bg-indigo-600');
-                modeToggleThumb.classList.add('translate-x-6');
-                modeToggleThumb.classList.remove('translate-x-1');
-                
-                labelStandard.classList.replace('text-slate-500', 'text-slate-400');
-                labelIncremental.classList.replace('text-slate-400', 'text-indigo-600');
+                // UI styles for Incremental active
+                btnIncremental.className = 'px-4 py-2 bg-brand-base text-brand-text transition-colors';
+                btnStandard.className = 'px-4 py-2 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors';
                 
                 baselineContainer.classList.remove('hidden');
                 netAcvDisplay.classList.remove('hidden');
             } else {
-                modeToggle.classList.add('bg-slate-200');
-                modeToggle.classList.remove('bg-indigo-600');
-                modeToggleThumb.classList.remove('translate-x-6');
-                modeToggleThumb.classList.add('translate-x-1');
-                
-                labelStandard.classList.replace('text-slate-400', 'text-slate-500');
-                labelIncremental.classList.replace('text-indigo-600', 'text-slate-400');
+                // UI styles for Standard active
+                btnStandard.className = 'px-4 py-2 bg-brand-base text-brand-text transition-colors';
+                btnIncremental.className = 'px-4 py-2 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors';
                 
                 baselineContainer.classList.add('hidden');
                 netAcvDisplay.classList.add('hidden');
-                
-                // Reset baseline logic visually (state remains, just inactive)
             }
             updateCalculations();
         }
@@ -308,12 +538,10 @@
             const currentCount = splits.length;
             
             if (newCount > currentCount) {
-                // Add new splits
                 for (let i = currentCount; i < newCount; i++) {
-                    splits.push({ id: Date.now() + i, percent: 0 });
+                    splits.push({ id: Date.now() + i, name: `Rep ${splits.length + 1}`, percent: 0 });
                 }
             } else if (newCount < currentCount) {
-                // Remove from end
                 splits = splits.slice(0, newCount);
             }
             
@@ -328,66 +556,99 @@
             
             splits.forEach((split, index) => {
                 const row = document.createElement('div');
-                row.className = 'bg-white rounded-lg border border-slate-200 p-4 flex flex-col sm:flex-row items-center gap-4 shadow-sm fade-in group focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500 transition-all';
-                row.style.animationDelay = `${index * 50}ms`;
+                row.className = 'flex flex-col sm:flex-row items-center justify-between py-4 border-b border-brand-line gap-4 group hover:bg-brand-surface transition-colors px-4 -mx-4';
+                row.style.animationDelay = `${index * 30}ms`;
+                row.classList.add('fade-in');
                 
-                // Amount placeholder - updated via JS later
                 row.innerHTML = `
-                    <div class="flex items-center gap-3 w-full sm:w-auto flex-1">
-                        <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs shrink-0">
-                            ${index + 1}
-                        </div>
+                    <div class="flex items-center gap-4 w-full sm:w-auto flex-1">
+                        <div class="font-mono text-[10px] tracking-widest text-brand-muted w-4">${String(index + 1).padStart(2, '0')}</div>
                         <input type="text" placeholder="Recipient Name" 
-                            class="bg-transparent border-none text-sm font-medium text-slate-700 placeholder-slate-400 focus:outline-none w-full"
-                            value="Rep ${index + 1}">
+                            class="bg-transparent border-0 border-b border-transparent focus:border-brand-forest focus:ring-0 text-sm md:text-base font-medium text-brand-text placeholder:text-brand-muted/50 w-full px-0 py-1 transition-colors outline-none"
+                            value="${split.name || 'Rep ' + (index + 1)}"
+                            oninput="handleNameChange(${index}, this.value)">
                     </div>
                     
-                    <div class="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
-                        <div class="relative w-28 group/input">
+                    <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                        <div class="relative w-20">
                             <input type="number" 
-                                class="block w-full rounded-md border-0 py-2 pl-3 pr-8 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 font-bold text-right bg-white transition-shadow"
+                                class="block w-full border-0 border-b border-brand-line bg-transparent py-1 pl-0 pr-6 text-brand-text focus:ring-0 focus:border-brand-forest text-lg font-medium text-right outline-none transition-colors"
                                 value="${split.percent}"
                                 min="0" max="100"
                                 step="any"
                                 placeholder="0"
                                 oninput="handleNumberChange(${index}, this.value)">
-                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-                                <span class="text-slate-400 sm:text-sm font-medium">%</span>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-1">
+                                <span class="text-brand-muted font-mono text-[10px]">%</span>
                             </div>
                         </div>
 
-                        <div class="w-32 text-right">
-                            <div class="amount-display text-sm font-bold text-slate-900 font-mono tracking-tight">$0.00</div>
+                        <div class="w-28 text-right">
+                            <div class="amount-display-acv text-base font-medium text-brand-muted tracking-tight">$0.00</div>
+                        </div>
+
+                        <div class="w-28 text-right">
+                            <div class="amount-display-payout text-lg font-medium text-brand-forest tracking-tight">$0.00</div>
+                        </div>
+                        
+                        <div class="w-6 flex justify-end">
+                            <button onclick="removeSplit(${index})" class="text-brand-muted hover:text-rust transition-colors p-1 ${splits.length <= 1 ? 'hidden' : ''}" title="Remove Rep">
+                                <i data-lucide="x" width="16" height="16"></i>
+                            </button>
                         </div>
                     </div>
                 `;
                 splitsContainer.appendChild(row);
             });
-            // Update initial values
+            
+            // Re-initialize icons for the newly created elements
+            lucide.createIcons({
+                root: splitsContainer
+            });
+            
             updateCalculations();
         }
 
         function updateCalculations() {
-            // Update ACV State
-            totalAcv = parseFloat(acvInput.value) || 0;
+            let rawInput = parseFloat(acvInput.value) || 0;
             baselineAcv = parseFloat(baselineInput.value) || 0;
+            commissionRate = parseFloat(commissionRateInput.value) || 0;
 
-            // Determine Commissionable Base
+            if (valType === 'tcv') {
+                const start = new Date(tcvStart.value);
+                const end = new Date(tcvEnd.value);
+                
+                if (start && end && end > start) {
+                    const diffTime = Math.abs(end.getTime() - start.getTime());
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    totalAcv = (rawInput / diffDays) * 365;
+                    hasAlertedDateError = false; // Reset error flag
+                } else {
+                    if (start && end && end <= start && !hasAlertedDateError) {
+                        showNotification('Invalid Date Range', 'End date must be chronologically after the start date.', 'error');
+                        hasAlertedDateError = true;
+                    }
+                    totalAcv = 0;
+                }
+                tcvCalcVal.textContent = totalAcv.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            } else {
+                totalAcv = rawInput;
+            }
+
             if (isIncrementalMode) {
                 netAcv = Math.max(0, totalAcv - baselineAcv);
-                netAcvValue.textContent = netAcv.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
             } else {
                 netAcv = totalAcv;
             }
 
-            // Calc Total Percent
+            totalPayout = netAcv * (commissionRate / 100);
+            totalPayoutValue.textContent = totalPayout.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
             const totalPercent = splits.reduce((sum, split) => sum + parseFloat(split.percent || 0), 0);
             
-            // Update UI Bars
             progressBar.style.width = `${Math.min(totalPercent, 100)}%`;
             percentDisplay.textContent = `${totalPercent.toFixed(1)}%`;
             
-            // Validation Logic
             const epsilon = 0.01; 
             const diff = Math.abs(100 - totalPercent);
             
@@ -399,42 +660,50 @@
                 setValidationState('warning', `${(100 - totalPercent).toFixed(1)}% remaining`);
             }
 
-            // Update row amounts
-            const amountDisplays = document.querySelectorAll('.amount-display');
+            const acvDisplays = document.querySelectorAll('.amount-display-acv');
+            const payoutDisplays = document.querySelectorAll('.amount-display-payout');
+            
             splits.forEach((split, index) => {
-                if (amountDisplays[index]) {
-                     const val = (netAcv * (split.percent / 100)).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-                     amountDisplays[index].textContent = val;
+                const splitPercent = (parseFloat(split.percent) || 0) / 100;
+                
+                if (acvDisplays[index]) {
+                     const acvVal = netAcv * splitPercent;
+                     acvDisplays[index].textContent = acvVal.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                }
+                
+                if (payoutDisplays[index]) {
+                    const payoutVal = totalPayout * splitPercent;
+                    payoutDisplays[index].textContent = payoutVal.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
                 }
             });
         }
 
         function setValidationState(state, message = '') {
-            statusIndicator.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors border';
-            
             if (state === 'valid') {
-                progressBar.className = 'bg-emerald-500 h-3 rounded-full transition-all duration-200 ease-out';
-                validationMsg.textContent = 'Perfectly balanced';
-                validationMsg.className = 'text-right text-xs mt-1 font-medium h-4 transition-colors text-emerald-600';
-                
-                statusIndicator.classList.add('bg-emerald-50', 'text-emerald-700', 'border-emerald-200');
-                statusDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                hasAlertedOverrun = false;
+                progressBar.className = 'bg-forest-500 h-2 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)';
+                validationMsg.textContent = 'Allocation Complete';
+                validationMsg.className = 'text-right font-mono text-[10px] tracking-widest mt-2 h-4 transition-colors text-forest-500 uppercase';
+                statusDot.className = 'w-2 h-2 rounded-full bg-forest-500';
+                statusDot.classList.remove('animate-pulse');
                 statusText.textContent = 'Balanced';
             } else if (state === 'error') {
-                progressBar.className = 'bg-red-500 h-3 rounded-full transition-all duration-200 ease-out';
+                if (!hasAlertedOverrun) {
+                    showNotification('Allocation Overrun', message, 'error');
+                    hasAlertedOverrun = true;
+                }
+                progressBar.className = 'bg-rust h-2 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)';
                 validationMsg.textContent = message;
-                validationMsg.className = 'text-right text-xs mt-1 font-bold h-4 transition-colors text-red-600';
-                
-                statusIndicator.classList.add('bg-red-50', 'text-red-700', 'border-red-200');
-                statusDot.className = 'w-2 h-2 rounded-full bg-red-500';
+                validationMsg.className = 'text-right font-mono text-[10px] tracking-widest mt-2 h-4 transition-colors text-rust uppercase';
+                statusDot.className = 'w-2 h-2 rounded-full bg-rust';
+                statusDot.classList.remove('animate-pulse');
                 statusText.textContent = 'Over Limit';
             } else {
-                progressBar.className = 'bg-indigo-500 h-3 rounded-full transition-all duration-200 ease-out';
+                hasAlertedOverrun = false;
+                progressBar.className = 'bg-brass h-2 transition-all duration-500 cubic-bezier(0.16, 1, 0.3, 1)';
                 validationMsg.textContent = message;
-                validationMsg.className = 'text-right text-xs mt-1 font-medium h-4 transition-colors text-indigo-600';
-                
-                statusIndicator.classList.add('bg-indigo-50', 'text-indigo-700', 'border-indigo-200');
-                statusDot.className = 'w-2 h-2 rounded-full bg-indigo-400 animate-pulse';
+                validationMsg.className = 'text-right font-mono text-[10px] tracking-widest mt-2 h-4 transition-colors text-brass uppercase';
+                statusDot.className = 'w-2 h-2 rounded-full bg-brass animate-pulse';
                 statusText.textContent = 'Incomplete';
             }
         }
@@ -448,11 +717,32 @@
             updateCalculations();
         };
 
+        window.handleNameChange = (index, value) => {
+            splits[index].name = value;
+        };
+
+        window.removeSplit = (index) => {
+            if (splits.length <= 1) return; // Must have at least one split
+            splits.splice(index, 1);
+            splitCount = splits.length;
+            splitsCountDisplay.textContent = splitCount;
+            renderSplits();
+            showNotification('Recipient Removed', 'The commission split list has been updated.', 'info');
+        };
+
         // --- DOM Event Listeners ---
+
+        btnValAcv.addEventListener('click', () => setValType('acv'));
+        btnValTcv.addEventListener('click', () => setValType('tcv'));
+        tcvStart.addEventListener('input', updateCalculations);
+        tcvEnd.addEventListener('input', updateCalculations);
 
         acvInput.addEventListener('input', updateCalculations);
         baselineInput.addEventListener('input', updateCalculations);
-        modeToggle.addEventListener('click', toggleMode);
+        commissionRateInput.addEventListener('input', updateCalculations);
+        
+        btnStandard.addEventListener('click', () => setMode('standard'));
+        btnIncremental.addEventListener('click', () => setMode('incremental'));
 
         increaseBtn.addEventListener('click', () => updateState(splitCount + 1));
         decreaseBtn.addEventListener('click', () => updateState(splitCount - 1));
@@ -469,12 +759,14 @@
                     runningTotal += split.percent;
                 }
             });
-            renderSplits(); // Re-render to update inputs
+            renderSplits();
+            showNotification('Auto-Distributed', `Contract value evenly split across ${splitCount} reps.`, 'success');
         });
 
         resetBtn.addEventListener('click', () => {
             splits.forEach(s => s.percent = 0);
             renderSplits();
+            showNotification('System Reset', 'All percentage allocations have been cleared.', 'info');
         });
 
         // Modal Logic
