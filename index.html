@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resume - Jose Luis Torres</title>
+    <title>Jose Torres | RevOps & Product</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -42,15 +42,38 @@
             color: #3A352F;
             /* Subtle organic noise texture */
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
-            -webkit-font-smoothing: antialiased;
         }
 
-        /* Hard shadow for main container */
+        /* Hard shadow for main container (Industrial Look) */
         .industrial-shadow {
             box-shadow: 8px 8px 0px 0px rgba(58,53,47,0.05);
         }
 
-        /* Premium Reveal Animations */
+        /* Interaction utility classes */
+        .spec-item {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease;
+            will-change: transform;
+        }
+
+        .spec-item:hover {
+            transform: scale(1.005);
+        }
+
+        .icon-shift {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .spec-item:hover .icon-shift {
+            transform: translateX(4px) translateY(-4px);
+        }
+
+        /* Crisp text rendering */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Premium Framer-like Reveal Animations */
         .reveal-up {
             opacity: 0;
             animation: revealUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -60,227 +83,223 @@
         @keyframes revealUp {
             to { opacity: 1; transform: translateY(0); }
         }
-
+        
+        /* Staggered Delays */
         .delay-100 { animation-delay: 0.1s; }
         .delay-200 { animation-delay: 0.2s; }
         .delay-300 { animation-delay: 0.3s; }
-
-        /* Print Optimization */
-        @media print {
-            @page { margin: 0.5in; size: portrait; }
-            body { background: white !important; padding: 0 !important; background-image: none !important; }
-            nav, .no-print, #print-fab { display: none !important; }
-            .industrial-shadow { box-shadow: none !important; border: 1px solid #ccc !important; }
-            .bg-brand-base { background-color: white !important; }
-            .bg-brand-line { background-color: transparent !important; border-color: #eee !important; }
-            main { width: 100% !important; max-width: 100% !important; margin: 0 !important; box-shadow: none !important; }
-            .print-border-b { border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem; }
-            a { text-decoration: none !important; color: #333 !important; }
-        }
+        .delay-400 { animation-delay: 0.4s; }
+        .delay-500 { animation-delay: 0.5s; }
+        .delay-600 { animation-delay: 0.6s; }
+        .delay-700 { animation-delay: 0.7s; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col p-6 md:p-10 lg:p-16 pt-0 md:pt-0 selection:bg-brand-forest selection:text-brand-base relative">
 
-    <!-- Navigation -->
-    <nav class="w-full flex justify-center items-center py-6 md:py-8 lg:py-10 reveal-up delay-100 no-print">
-        <div class="flex gap-4 md:gap-12 font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase leading-none">
-            <a href="index.html" class="relative group hover:text-brand-forest transition-colors py-1 px-4">
-                <span class="absolute -left-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="arrow-left" width="12" height="12"></i></span>
-                Return to Portfolio
+    <!-- Top Navigation (Editorial/Minimalist Style) -->
+    <nav class="w-full flex justify-center items-center py-3 reveal-up delay-100">
+        <div class="flex gap-8 md:gap-12 font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase leading-none">
+            <a href="#profile" class="relative group hover:text-brand-forest transition-colors py-1">
+                Profile
+                <span class="absolute -bottom-1 left-1/2 w-1 h-1 bg-brand-forest rounded-full opacity-0 -translate-x-1/2 group-hover:opacity-100 transition-opacity"></span>
+            </a>
+            <a href="#projects" class="relative group hover:text-brand-forest transition-colors py-1">
+                Projects
+                <span class="absolute -bottom-1 left-1/2 w-1 h-1 bg-brand-forest rounded-full opacity-0 -translate-x-1/2 group-hover:opacity-100 transition-opacity"></span>
+            </a>
+            <a href="#contact" class="relative group hover:text-brand-forest transition-colors py-1">
+                Contact
+                <span class="absolute -bottom-1 left-1/2 w-1 h-1 bg-brand-forest rounded-full opacity-0 -translate-x-1/2 group-hover:opacity-100 transition-opacity"></span>
             </a>
         </div>
     </nav>
 
-    <!-- Main Resume Container -->
-    <main class="w-full max-w-[900px] mx-auto fade-in flex flex-col bg-brand-line gap-px border border-brand-line industrial-shadow relative overflow-hidden reveal-up delay-200">
+    <!-- Main Container: Industrial Grid with Premium Motion -->
+    <main class="w-full max-w-[1400px] mx-auto flex flex-col xl:flex-row bg-brand-line gap-px border border-brand-line industrial-shadow relative overflow-hidden reveal-up delay-200">
         
-        <!-- Header Section -->
-        <header class="bg-brand-base p-8 md:p-12 relative">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                <div>
-                    <h1 class="text-4xl md:text-5xl font-medium tracking-tight text-brand-text mb-2">Jose Luis Torres</h1>
-                    <h2 class="text-sm md:text-base font-mono tracking-wide text-brand-accent uppercase mb-6">
-                        Product Manager & RevOps
-                    </h2>
+        <!-- Left Panel: Header / Spec Sheet Meta -->
+        <header id="profile" class="bg-brand-base w-full xl:w-[40%] p-8 md:p-12 lg:p-16 relative flex flex-col justify-between min-h-[400px] xl:min-h-[700px]">
+            <div>
+                <div class="mt-8 xl:mt-12">
+                    <div class="flex items-center gap-5 md:gap-6 mb-8 reveal-up delay-300">
+                        <!-- Profile Photo Container (ID Badge Style) -->
+                        <div class="w-20 h-20 md:w-24 md:h-24 rounded-md border border-brand-line overflow-hidden bg-brand-surface flex-shrink-0 shadow-sm">
+                            <img src="profile.jpg" alt="Jose Torres Profile" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                        </div>
+                        
+                        <div>
+                            <h1 class="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight text-brand-text mb-2">
+                                Jose Torres
+                            </h1>
+                            <h2 class="text-sm md:text-base font-mono tracking-wide text-brand-accent uppercase">
+                                Product Manager & RevOps
+                            </h2>
+                        </div>
+                    </div>
                     
-                    <div class="flex flex-wrap gap-4 md:gap-6 font-mono text-[10px] tracking-wider text-brand-muted uppercase">
+                    <div class="reveal-up delay-400">
+                        <p class="text-base md:text-lg leading-relaxed text-brand-text/80 max-w-md">
+                            Driving operational efficiency and product strategy. Expert in Deal Desk operations, SaaS pricing models, and workflow automation. Building a suite of precise, automated tools for seamless revenue operations.
+                        </p>
+                    </div>
+
+                    <div class="mt-10 flex items-center gap-6 font-mono text-xs text-brand-muted uppercase tracking-wider reveal-up delay-500">
                         <div class="flex items-center gap-2">
-                            <i data-lucide="map-pin" width="12" height="12"></i>
-                            <span>Dixon, CA</span>
+                            <i data-lucide="map-pin" width="14" height="14"></i>
+                            <span>Bay Area / Sacramento</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="phone" width="12" height="12"></i>
-                            <span>(707) 718-2877</span>
-                        </div>
-                        <a href="mailto:joseluistorres@outlook.com" class="flex items-center gap-2 hover:text-brand-forest transition-colors">
-                            <i data-lucide="mail" width="12" height="12"></i>
-                            <span>joseluistorres@outlook.com</span>
-                        </a>
                     </div>
                 </div>
-                
-                <!-- View PDF Button -->
-                <a href="https://drive.google.com/file/d/1OdWbRxUR3UQ453glfWbnQa7rBaWl1tSE/view?usp=sharing" target="_blank" class="no-print font-mono text-[10px] tracking-[0.2em] text-brand-text bg-brand-surface border border-brand-line hover:bg-brand-line transition-colors px-4 py-2 uppercase flex items-center gap-2">
-                    <i data-lucide="file-text" width="14" height="14"></i>
-                    View as PDF
-                </a>
             </div>
         </header>
 
-        <!-- Skills Section -->
-        <section class="bg-brand-base p-8 md:p-12">
-            <div class="flex items-center gap-3 mb-6">
-                <span class="w-1.5 h-1.5 bg-brand-accent rounded-full"></span>
-                <h3 class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase font-medium">01. Relevant Skills</h3>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-brand-surface/50 p-4 border border-brand-line/50">
-                    <h4 class="font-mono text-[10px] tracking-widest text-brand-forest uppercase mb-2">Deal Desk & RevOps</h4>
-                    <p class="text-sm text-brand-text/90 leading-relaxed">
-                        Contract Negotiation, Deal Structuring, Policy Development, US GAAP, SaaS Models
-                    </p>
-                </div>
-                <div class="bg-brand-surface/50 p-4 border border-brand-line/50">
-                    <h4 class="font-mono text-[10px] tracking-widest text-brand-forest uppercase mb-2">Systems & Technical</h4>
-                    <p class="text-sm text-brand-text/90 leading-relaxed">
-                        Salesforce (Advanced), Microsoft Suite, Conga, Workflow Automation
-                    </p>
-                </div>
-            </div>
-        </section>
+        <!-- Right Panel: Tool Grid -->
+        <div class="bg-brand-line w-full xl:w-[60%] grid grid-cols-1 md:grid-cols-2 gap-px">
 
-        <!-- Experience Section -->
-        <section class="bg-brand-base p-8 md:p-12">
-            <div class="flex items-center gap-3 mb-8">
+            <!-- Section Header: Projects -->
+            <div id="projects" class="bg-brand-base px-8 py-6 md:px-10 md:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 reveal-up delay-300">
+                <div class="flex items-center gap-3">
+                    <span class="w-1.5 h-1.5 bg-brand-forest rounded-full"></span>
+                    <h2 class="font-mono text-[11px] md:text-xs tracking-[0.2em] text-brand-text uppercase font-medium">Projects</h2>
+                </div>
+                <span class="font-mono text-[10px] tracking-[0.15em] text-brand-muted uppercase">Designed & Built by J. Torres</span>
+            </div>
+
+            <!-- 01. Contract Visualizer -->
+            <a href="timelines.html" class="spec-item bg-brand-base hover:bg-brand-forestTint p-8 md:p-10 flex flex-col justify-between min-h-[260px] group reveal-up delay-400">
+                <div class="flex justify-between items-start mb-8">
+                    <p class="font-mono text-xs tracking-widest text-brand-muted group-hover:text-brand-forest transition-colors">01</p>
+                    <i data-lucide="arrow-up-right" width="20" height="20" class="text-brand-muted icon-shift group-hover:text-brand-forest"></i>
+                </div>
+                <div>
+                    <i data-lucide="calendar-range" width="28" height="28" class="text-brand-text mb-5 opacity-70 group-hover:opacity-100 group-hover:text-brand-forest transition-all"></i>
+                    <h3 class="text-xl font-medium text-brand-text mb-2 group-hover:text-brand-forest transition-colors">Timelines</h3>
+                    <p class="text-sm text-brand-muted leading-relaxed group-hover:text-brand-forest/70 transition-colors">Deal cycle mapping & tracking mechanisms.</p>
+                </div>
+            </a>
+
+            <!-- 02. Commissions -->
+            <a href="commission_splitter.html" class="spec-item bg-brand-base hover:bg-brand-forestTint p-8 md:p-10 flex flex-col justify-between min-h-[260px] group reveal-up delay-500">
+                <div class="flex justify-between items-start mb-8">
+                    <p class="font-mono text-xs tracking-widest text-brand-muted group-hover:text-brand-forest transition-colors">02</p>
+                    <i data-lucide="arrow-up-right" width="20" height="20" class="text-brand-muted icon-shift group-hover:text-brand-forest"></i>
+                </div>
+                <div>
+                    <i data-lucide="pie-chart" width="28" height="28" class="text-brand-text mb-5 opacity-70 group-hover:opacity-100 group-hover:text-brand-forest transition-all"></i>
+                    <h3 class="text-xl font-medium text-brand-text mb-2 group-hover:text-brand-forest transition-colors">Commissions</h3>
+                    <p class="text-sm text-brand-muted leading-relaxed group-hover:text-brand-forest/70 transition-colors">Automated revenue routing & splitting.</p>
+                </div>
+            </a>
+
+            <!-- 03. Day Counter -->
+            <a href="day_counter.html" class="spec-item bg-brand-base hover:bg-brand-forestTint p-8 md:p-10 flex flex-col justify-between min-h-[260px] group reveal-up delay-600">
+                <div class="flex justify-between items-start mb-8">
+                    <p class="font-mono text-xs tracking-widest text-brand-muted group-hover:text-brand-forest transition-colors">03</p>
+                    <i data-lucide="arrow-up-right" width="20" height="20" class="text-brand-muted icon-shift group-hover:text-brand-forest"></i>
+                </div>
+                <div>
+                    <i data-lucide="calendar-clock" width="28" height="28" class="text-brand-text mb-5 opacity-70 group-hover:opacity-100 group-hover:text-brand-forest transition-all"></i>
+                    <h3 class="text-xl font-medium text-brand-text mb-2 group-hover:text-brand-forest transition-colors">Day Counter</h3>
+                    <p class="text-sm text-brand-muted leading-relaxed group-hover:text-brand-forest/70 transition-colors">Precision SLA & date tracking module.</p>
+                </div>
+            </a>
+
+            <!-- 04. Proration Calc -->
+            <a href="proration_calculator.html" class="spec-item bg-brand-base hover:bg-brand-forestTint p-8 md:p-10 flex flex-col justify-between min-h-[260px] group reveal-up delay-700">
+                <div class="flex justify-between items-start mb-8">
+                    <p class="font-mono text-xs tracking-widest text-brand-muted group-hover:text-brand-forest transition-colors">04</p>
+                    <i data-lucide="arrow-up-right" width="20" height="20" class="text-brand-muted icon-shift group-hover:text-brand-forest"></i>
+                </div>
+                <div>
+                    <i data-lucide="calculator" width="28" height="28" class="text-brand-text mb-5 opacity-70 group-hover:opacity-100 group-hover:text-brand-forest transition-all"></i>
+                    <h3 class="text-xl font-medium text-brand-text mb-2 group-hover:text-brand-forest transition-colors">Proration Calc</h3>
+                    <p class="text-sm text-brand-muted leading-relaxed group-hover:text-brand-forest/70 transition-colors">Instant MRR/ARR contract mathematics.</p>
+                </div>
+            </a>
+
+            <!-- Section Header: Contact & Info -->
+            <div id="contact" class="bg-brand-base px-8 py-6 md:px-10 md:col-span-2 flex items-center gap-3 reveal-up delay-500">
                 <span class="w-1.5 h-1.5 bg-brand-forest rounded-full"></span>
-                <h3 class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase font-medium">02. Experience</h3>
+                <h2 class="font-mono text-[11px] md:text-xs tracking-[0.2em] text-brand-text uppercase font-medium">Contact</h2>
             </div>
 
-            <div class="space-y-10">
-                <!-- Job 1 -->
-                <div class="group print-border-b">
-                    <div class="flex flex-col md:flex-row justify-between items-baseline mb-3">
+            <!-- 05. Resume (Spans 2 columns on tablet/desktop) -->
+            <a href="resume.html" class="spec-item bg-brand-base hover:bg-brand-forestTint p-8 md:p-10 md:col-span-2 flex flex-col justify-center min-h-[140px] group reveal-up delay-600">
+                <div class="flex items-center justify-between w-full">
+                    <div class="flex items-center gap-6">
+                        <p class="font-mono text-xs tracking-widest text-brand-muted group-hover:text-brand-forest transition-colors">05</p>
                         <div>
-                            <h4 class="text-lg font-medium text-brand-text">Revenue Operations, Deal Desk & M&A Manager</h4>
-                            <span class="text-sm text-brand-accent font-medium">Workday Inc.</span>
+                            <h3 class="text-lg font-medium text-brand-text mb-1 group-hover:text-brand-forest transition-colors">Resume</h3>
+                            <p class="text-sm text-brand-muted group-hover:text-brand-forest/70 transition-colors">View complete professional history.</p>
                         </div>
-                        <span class="font-mono text-[10px] tracking-widest text-brand-muted uppercase mt-1 md:mt-0">Apr 2021 – Feb 2026</span>
                     </div>
-                    <ul class="space-y-2 text-sm text-brand-text/80 leading-relaxed list-none pl-0">
-                        <li class="flex gap-3">
-                            <span class="mt-1.5 w-1 h-1 bg-brand-line rounded-full flex-shrink-0"></span>
-                            <span>Partnered with Sales/CS to manage a $100M+ TCV quarterly portfolio, acting as a trusted advisor for complex deal construction.</span>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="mt-1.5 w-1 h-1 bg-brand-line rounded-full flex-shrink-0"></span>
-                            <span>Architected technology-driven platforms to automate manual processes, significantly improving deal accuracy and GTM speed.</span>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="mt-1.5 w-1 h-1 bg-brand-line rounded-full flex-shrink-0"></span>
-                            <span>Led complex contract negotiations with Legal/Finance to accelerate deal cycles and ensure compliant redlines.</span>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="mt-1.5 w-1 h-1 bg-brand-line rounded-full flex-shrink-0"></span>
-                            <span>Delivered clean order forms and accurate pricing to support forecasting rigor and pipeline hygiene.</span>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="mt-1.5 w-1 h-1 bg-brand-line rounded-full flex-shrink-0"></span>
-                            <span>Evaluated commercial exceptions for critical renewals as the Deal Desk authority.</span>
-                        </li>
-                    </ul>
+                    <!-- Changed from download icon to arrow-right to indicate navigation to a page -->
+                    <i data-lucide="arrow-right" width="24" height="24" class="text-brand-muted arrow-right group-hover:text-brand-forest transition-all"></i>
                 </div>
+            </a>
 
-                <!-- Job 2 -->
-                <div class="group print-border-b">
-                    <div class="flex flex-col md:flex-row justify-between items-baseline mb-3">
-                        <div>
-                            <h4 class="text-lg font-medium text-brand-text">Associate Deal Desk Analyst</h4>
-                            <span class="text-sm text-brand-accent font-medium">New Relic</span>
-                        </div>
-                        <span class="font-mono text-[10px] tracking-widest text-brand-muted uppercase mt-1 md:mt-0">Sep 2020 – Jan 2021</span>
-                    </div>
-                    <ul class="space-y-2 text-sm text-brand-text/80 leading-relaxed list-none pl-0">
-                        <li class="flex gap-3">
-                            <span class="mt-1.5 w-1 h-1 bg-brand-line rounded-full flex-shrink-0"></span>
-                            <span>Constructed and reviewed order forms to ensure accuracy and adherence to pricing/revenue policies.</span>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="mt-1.5 w-1 h-1 bg-brand-line rounded-full flex-shrink-0"></span>
-                            <span>Managed end-to-end sales processes, facilitating contract signatures and Salesforce data management.</span>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="mt-1.5 w-1 h-1 bg-brand-line rounded-full flex-shrink-0"></span>
-                            <span>Coordinated with Legal and Finance to accelerate transaction cycles and resolve issues.</span>
-                        </li>
-                    </ul>
-                </div>
+            <!-- 06. Email -->
+            <a href="mailto:joseluistorres@outlook.com" class="spec-item bg-brand-base hover:bg-brand-forestTint p-8 flex flex-col justify-center items-center text-center min-h-[140px] group reveal-up delay-700">
+                <i data-lucide="mail" width="24" height="24" class="text-brand-muted mb-3 group-hover:text-brand-forest transition-colors"></i>
+                <h3 class="text-sm font-medium text-brand-text group-hover:text-brand-forest transition-colors">Email Contact</h3>
+            </a>
 
-                <!-- Job 3 -->
-                <div class="group">
-                    <div class="flex flex-col md:flex-row justify-between items-baseline mb-3">
-                        <div>
-                            <h4 class="text-lg font-medium text-brand-text">Sales Policy Management / Deal Desk Strategist</h4>
-                            <span class="text-sm text-brand-accent font-medium">LinkedIn</span>
-                        </div>
-                        <span class="font-mono text-[10px] tracking-widest text-brand-muted uppercase mt-1 md:mt-0">Mar 2020 – Sep 2020</span>
-                    </div>
-                    <ul class="space-y-2 text-sm text-brand-text/80 leading-relaxed list-none pl-0">
-                        <li class="flex gap-3">
-                            <span class="mt-1.5 w-1 h-1 bg-brand-line rounded-full flex-shrink-0"></span>
-                            <span>Acted as policy arbiter for subscription units, evaluating exceptions and enforcing billing policies.</span>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="mt-1.5 w-1 h-1 bg-brand-line rounded-full flex-shrink-0"></span>
-                            <span>Partnered with Billing Support and Data Assurance to ensure proper closure procedures.</span>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="mt-1.5 w-1 h-1 bg-brand-line rounded-full flex-shrink-0"></span>
-                            <span>Drove Sales Enablement by redesigning the internal policy website to drive adoption of new processes.</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </section>
+            <!-- 07. LinkedIn -->
+            <a href="https://www.linkedin.com/in/j-luis-torres/" target="_blank" class="spec-item bg-brand-base hover:bg-brand-forestTint p-8 flex flex-col justify-center items-center text-center min-h-[140px] group reveal-up delay-700">
+                <i data-lucide="linkedin" width="24" height="24" class="text-brand-muted mb-3 group-hover:text-brand-forest transition-colors"></i>
+                <h3 class="text-sm font-medium text-brand-text group-hover:text-brand-forest transition-colors">LinkedIn</h3>
+            </a>
 
-        <!-- Education Section -->
-        <section class="bg-brand-base p-8 md:p-12">
-            <div class="flex items-center gap-3 mb-8">
-                <span class="w-1.5 h-1.5 bg-brand-muted rounded-full"></span>
-                <h3 class="font-mono text-[10px] tracking-[0.2em] text-brand-muted uppercase font-medium">03. Education</h3>
-            </div>
-
-            <div class="space-y-8">
-                <div>
-                    <div class="flex flex-col md:flex-row justify-between items-baseline mb-1">
-                        <h4 class="text-sm font-medium text-brand-text">Technical Training & Career Development</h4>
-                        <span class="font-mono text-[10px] tracking-widest text-brand-muted uppercase">Sep 2018 – July 2019</span>
-                    </div>
-                    <div class="text-sm text-brand-accent mb-2">Year Up</div>
-                    <p class="text-sm text-brand-text/80 leading-relaxed">
-                        Completed coursework in Project Coordination, Web Development, Network System Admin, and Business Communications.
-                    </p>
-                </div>
-
-                <div>
-                    <div class="flex flex-col md:flex-row justify-between items-baseline mb-1">
-                        <h4 class="text-sm font-medium text-brand-text">Coursework</h4>
-                        <span class="font-mono text-[10px] tracking-widest text-brand-muted uppercase">Aug 2012 – June 2013</span>
-                    </div>
-                    <div class="text-sm text-brand-accent">Sacramento State University</div>
-                </div>
-            </div>
-        </section>
-
+        </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="w-full max-w-[900px] mx-auto mt-8 flex justify-center text-[10px] font-mono tracking-widest text-brand-muted uppercase reveal-up delay-300 pb-8 no-print">
-        <span>Designed & Developed by <span class="text-brand-text font-medium">Jose Torres</span></span>
+    <footer class="w-full max-w-[1400px] mx-auto mt-8 flex justify-center text-[10px] font-mono tracking-widest text-brand-muted uppercase reveal-up delay-700 pb-8">
+        <span>Developed by <span class="text-brand-text font-medium cursor-pointer transition-all duration-500 hover:text-brand-forest hover:[text-shadow:0_0_12px_rgba(31,58,44,0.5)]" onclick="toggleContactModal(true)">Jose Torres</span></span>
     </footer>
+
+    <!-- Contact Info Modal -->
+    <div id="contact-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-brand-text/10 backdrop-blur-sm transition-opacity" onclick="toggleContactModal(false)"></div>
+        <div class="relative bg-brand-base border border-brand-line w-full max-w-sm fade-in z-50 industrial-shadow">
+            <div class="px-6 py-4 border-b border-brand-line flex justify-between items-center bg-brand-surface">
+                <h3 class="font-mono text-[10px] tracking-[0.2em] text-brand-text uppercase flex items-center gap-2">
+                    <i data-lucide="user" width="14" height="14"></i>
+                    Contact
+                </h3>
+                <button class="text-brand-muted hover:text-brand-text transition-colors" onclick="toggleContactModal(false)">
+                    <i data-lucide="x" width="16" height="16"></i>
+                </button>
+            </div>
+            <div class="p-8 space-y-4">
+                <a href="mailto:joseluistorres@outlook.com" class="spec-item flex items-center gap-4 p-4 border border-brand-line bg-brand-base hover:bg-brand-forestTint group">
+                    <i data-lucide="mail" width="20" height="20" class="text-brand-muted group-hover:text-brand-forest transition-colors"></i>
+                    <div class="overflow-hidden">
+                        <div class="font-mono text-[10px] tracking-widest text-brand-muted uppercase mb-1 group-hover:text-brand-forest/70 transition-colors">Email</div>
+                        <div class="text-sm font-medium text-brand-text group-hover:text-brand-forest transition-colors truncate">joseluistorres@outlook.com</div>
+                    </div>
+                </a>
+                <a href="https://www.linkedin.com/in/j-luis-torres/" target="_blank" class="spec-item flex items-center gap-4 p-4 border border-brand-line bg-brand-base hover:bg-brand-forestTint group">
+                    <i data-lucide="linkedin" width="20" height="20" class="text-brand-muted group-hover:text-brand-forest transition-colors"></i>
+                    <div class="overflow-hidden">
+                        <div class="font-mono text-[10px] tracking-widest text-brand-muted uppercase mb-1 group-hover:text-brand-forest/70 transition-colors">LinkedIn</div>
+                        <div class="text-sm font-medium text-brand-text group-hover:text-brand-forest transition-colors truncate">linkedin.com/in/j-luis-torres</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <script>
         lucide.createIcons();
+
+        function toggleContactModal(show) {
+            const modal = document.getElementById('contact-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
     </script>
 </body>
 </html>
