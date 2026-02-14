@@ -101,7 +101,7 @@
         <div class="flex items-center gap-3 mb-1">
             <span id="status-dot" class="w-2 h-2 rounded-full bg-brass animate-pulse"></span>
             <span id="status-text" class="font-mono text-[10px] tracking-widest text-brand-muted uppercase">Ready</span>
-            <button id="info-btn" class="ml-2 text-brand-muted hover:text-brand-forest transition-colors">
+            <button id="info-btn" class="ml-2 text-brand-muted hover:text-brand-text transition-colors">
                 <i data-lucide="info" width="18" height="18"></i>
             </button>
         </div>
@@ -179,8 +179,12 @@
                     </div>
                 </div>
 
-                <div class="mt-10 flex justify-end">
-                    <button id="calculate-btn" class="font-mono text-[10px] tracking-[0.2em] text-brand-base bg-brand-forest hover:bg-forest-700 transition-colors px-8 py-3 uppercase flex items-center justify-center gap-2">
+                <!-- Action Buttons -->
+                <div class="mt-10 flex justify-end gap-6 items-center">
+                    <button id="clear-btn" class="font-mono text-[10px] tracking-[0.2em] text-brand-muted hover:text-brand-forest transition-colors px-4 py-2 uppercase flex items-center gap-2 group">
+                        <i data-lucide="rotate-ccw" width="12" height="12" class="group-hover:-rotate-90 transition-transform duration-300"></i> Clear
+                    </button>
+                    <button id="calculate-btn" class="font-mono text-[10px] tracking-[0.2em] text-brand-base bg-brand-forest hover:bg-forest-700 transition-colors px-8 py-3 uppercase flex items-center justify-center gap-2 industrial-shadow hover:shadow-none translate-y-0 hover:translate-y-0.5 transition-all">
                         <i data-lucide="calculator" width="12" height="12"></i> Calculate
                     </button>
                 </div>
@@ -202,7 +206,7 @@
                         <div class="flex items-baseline gap-2">
                             <span id="res-prorated" class="text-4xl md:text-5xl font-medium text-brand-text tracking-tight">$0.00</span>
                         </div>
-                        <span class="font-mono text-[9px] text-brand-muted uppercase">Invoice for First Period</span>
+                        <span class="font-mono text-[9px] text-brand-muted uppercase">Initial Period (Stub)</span>
                     </div>
 
                     <!-- Factor % -->
@@ -290,7 +294,7 @@
             <div class="p-8 space-y-6 text-sm text-brand-text leading-relaxed">
                 <div>
                     <h4 class="font-medium mb-2">Logic Overview</h4>
-                    <p class="text-brand-muted">This tool breaks contract durations into annual periods starting from the Add-on Start Date. The partial year (stub) is placed at the end of the term.</p>
+                    <p class="text-brand-muted">This tool calculates contract terms by aligning annual periods to the <strong>Contract End Date</strong>. The partial year (stub) is placed at the start of the term to accommodate mid-cycle add-ons.</p>
                 </div>
 
                 <div class="border-t border-brand-line pt-6">
@@ -328,6 +332,7 @@
         const upliftPercentInput = document.getElementById('uplift-percent');
         const btnAcv = document.getElementById('type-btn-acv');
         const btnTcv = document.getElementById('type-btn-tcv');
+        const clearBtn = document.getElementById('clear-btn');
         
         const resultsContainer = document.getElementById('results-container');
         const emptyState = document.getElementById('empty-state');
@@ -348,7 +353,30 @@
                 btnAcv.className = 'px-3 py-1 text-brand-muted hover:text-brand-text hover:bg-white/50 transition-colors';
                 valueHelpText.textContent = "TOTAL CONTRACT VALUE (STUB + RENEWALS)";
             }
+            // Only recalculate if we have input, to allow clean resets
             if(inputValue.value) calculate();
+        }
+
+        function resetForm() {
+            // Clear inputs
+            startDateInput.value = '';
+            endDateInput.value = '';
+            inputValue.value = '';
+            upliftPercentInput.value = '5.0';
+            
+            // Reset Type to ACV
+            setInputType('ACV');
+
+            // Hide results
+            resultsContainer.classList.add('hidden');
+            emptyState.classList.remove('hidden');
+
+            // Reset Status
+            document.getElementById('status-dot').className = 'w-2 h-2 rounded-full bg-brass animate-pulse';
+            document.getElementById('status-text').textContent = 'Ready';
+            document.getElementById('status-text').className = 'font-mono text-[10px] tracking-widest text-brand-muted uppercase';
+
+            showNotification('Form Cleared', 'All fields have been reset.', 'info');
         }
 
         function formatDate(date) {
@@ -371,30 +399,39 @@
                 return;
             }
 
-            // 1. Break down periods (Stub at End logic)
+            // 1. Break down periods (Stub at START logic)
             const periods = [];
-            let currentStart = new Date(start);
+            let currentEnd = new Date(end);
             
-            // Loop until we reach the end
-            while (currentStart <= end) {
-                // Calculate 1 year forward
-                let nextCycleEnd = new Date(currentStart);
-                nextCycleEnd.setFullYear(nextCycleEnd.getFullYear() + 1);
-                nextCycleEnd.setDate(nextCycleEnd.getDate() - 1);
-                
-                // Cap at contract end
-                if (nextCycleEnd > end) {
-                    nextCycleEnd = new Date(end);
+            // Loop as long as the period end is after our start date
+            while (currentEnd >= start) {
+                // Calculate potential start of this annual cycle (End - 1 year + 1 day)
+                let cycleStart = new Date(currentEnd);
+                cycleStart.setFullYear(cycleStart.getFullYear() - 1);
+                cycleStart.setDate(cycleStart.getDate() + 1);
+
+                // If the full year cycle starts before our actual start date, 
+                // this is the stub period (the beginning of the contract).
+                if (cycleStart < start) {
+                    periods.unshift({
+                        start: new Date(start),
+                        end: new Date(currentEnd)
+                    });
+                    break; // We've reached the start
+                } else {
+                    // It's a full year
+                    periods.unshift({
+                        start: new Date(cycleStart),
+                        end: new Date(currentEnd)
+                    });
+                    
+                    // Move cursor back to the day before this cycle started
+                    currentEnd = new Date(cycleStart);
+                    currentEnd.setDate(currentEnd.getDate() - 1);
+                    
+                    // Edge case: if we hit exact start date on boundary
+                    if (currentEnd < start) break;
                 }
-
-                periods.push({
-                    start: new Date(currentStart),
-                    end: new Date(nextCycleEnd)
-                });
-
-                // Advance
-                currentStart = new Date(nextCycleEnd);
-                currentStart.setDate(currentStart.getDate() + 1);
             }
 
             // 2. Calculate Factors
@@ -409,6 +446,7 @@
                 const isFullYear = (pDays >= 365 && pDays <= 366); 
                 p.isFullYear = isFullYear; 
 
+                // Uplift applies to years after the first one
                 const upliftMultiplier = Math.pow(1 + (uplift / 100), index); 
                 
                 let periodFactor = 0;
@@ -548,6 +586,8 @@
         const calcBtn = document.getElementById('calculate-btn');
         calcBtn.addEventListener('click', calculate);
         
+        clearBtn.addEventListener('click', resetForm);
+
         btnAcv.addEventListener('click', () => setInputType('ACV'));
         btnTcv.addEventListener('click', () => setInputType('TCV'));
 
@@ -557,3 +597,5 @@
     </script>
 </body>
 </html>
+
+
