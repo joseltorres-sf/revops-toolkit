@@ -220,11 +220,6 @@
                 </div>
                 
                 <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
-                    <!-- New Info Button for Fullscreen -->
-                    <button id="timeline-info-btn" class="text-brand-muted hover:text-brand-forest transition-colors p-1" title="System Info">
-                        <i data-lucide="info" width="16" height="16"></i>
-                    </button>
-                    
                     <button id="clear-all-btn" class="font-mono text-[10px] tracking-[0.2em] text-rust hover:bg-rust-tint transition-colors px-4 py-2 uppercase border border-transparent hidden">
                         Clear All
                     </button>
@@ -364,15 +359,19 @@
             </div>
             <div class="p-8 space-y-6 text-sm text-brand-text leading-relaxed">
                 <div>
-                    <h4 class="font-medium mb-2">System Objective</h4>
-                    <p class="text-brand-muted">Visualizing overlapping contract terms and transaction history is critical for Deal Desk to prevent coverage gaps and ensure accurate revenue recognition. This tool standardizes the mapping of complex multi-agreement relationships.</p>
+                    <h4 class="font-medium mb-2 text-brand-text">System Objective</h4>
+                    <p class="text-brand-muted">
+                        Visualizing overlapping contract terms and transaction history is critical for Deal Desk to prevent coverage gaps and ensure accurate revenue recognition. Often, Deal Desk will whiteboard contract timelines to visualize them, especially with the customer base. However, whiteboarding can be challenging to collaborate on with remote workers. This tool makes it easy to map a customer's existing contract timelines alongside potential future agreements.
+                    </p>
                 </div>
                 <div class="border-t border-brand-line pt-6">
-                    <h4 class="font-medium mb-2">Rendering Logic</h4>
-                    <p class="text-brand-muted">The timeline visualization automatically scales to fit the available viewport width, ensuring all agreements are visible in a single view without scrolling.</p>
-                    <div class="bg-brand-surface p-4 mt-3 border border-brand-line font-mono text-[10px] tracking-wide text-center text-brand-text uppercase">
-                        (Agreement Duration / Total Viewport Time) * 100%
-                    </div>
+                    <h4 class="font-medium mb-4 text-brand-text">How to Use This Tool</h4>
+                    <ol class="space-y-4 text-brand-muted list-decimal list-outside ml-4 marker:text-brand-accent marker:font-mono marker:text-xs">
+                        <li><strong class="text-brand-text font-medium">Add Existing Agreements:</strong> Use the "Underlying Agreements" section to plot current active contracts. Assign distinct colors to easily identify different service tiers or MSAs.</li>
+                        <li><strong class="text-brand-text font-medium">Map Future Deals:</strong> Use the "Map New Agreement" section to propose renewals or consolidations. These render as dashed "ghost" timelines for clear distinction.</li>
+                        <li><strong class="text-brand-text font-medium">Edit & Refine:</strong> Hover over any plotted bar to see exact details. Click the pencil icon to edit dates, switch colors, or attach specific notes.</li>
+                        <li><strong class="text-brand-text font-medium">Review & Share:</strong> The canvas automatically scales to fit all inputs. Review the holistic timeline to identify gaps before sharing with stakeholders.</li>
+                    </ol>
                 </div>
             </div>
         </div>
@@ -812,7 +811,6 @@
 
             // Info Modal
             const infoBtn = document.getElementById('info-btn');
-            const timelineInfoBtn = document.getElementById('timeline-info-btn');
             const infoModal = document.getElementById('info-modal');
             const closeInfoBtn = document.getElementById('close-info-btn');
             const infoBackdrop = document.getElementById('info-backdrop');
@@ -823,7 +821,6 @@
             };
 
             infoBtn.addEventListener('click', () => toggleInfo(true));
-            if(timelineInfoBtn) timelineInfoBtn.addEventListener('click', () => toggleInfo(true));
             closeInfoBtn.addEventListener('click', () => toggleInfo(false));
             infoBackdrop.addEventListener('click', () => toggleInfo(false));
         });
